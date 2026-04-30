@@ -1,43 +1,130 @@
 {
   "id": "festival_story_wishes",
-  "title": "Festival Wishes Story",
+  "title": "Wishes — Story Centered",
   "category": "FESTIVAL",
   "format": "STORY_9_16",
   "background": {
     "type": "solid",
-    "colors": ["#FEF9C3"]
+    "colors": ["#FFFAEC"]
   },
   "layers": [
+    {
+      "id": "top_dot",
+      "type": "SHAPE",
+      "x": 528,
+      "y": 220,
+      "width": 24,
+      "height": 24,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#B71C3A"],
+        "cornerRadius": 12
+      }
+    },
+    {
+      "id": "eyebrow_rule",
+      "type": "SHAPE",
+      "x": 440,
+      "y": 280,
+      "width": 200,
+      "height": 3,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#E8A33D"]
+      }
+    },
     {
       "id": "headline",
       "type": "TEXT",
       "binding": "HEADLINE",
-      "x": 90,
-      "y": 320,
-      "width": 760,
-      "height": 260,
+      "x": 72,
+      "y": 360,
+      "width": 936,
+      "height": 540,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 62,
+        "fontSize": 130,
         "fontWeight": "Bold",
-        "color": "#854D0E",
+        "fontFamily": "serif",
+        "color": "#5C2A14",
         "align": "Center",
-        "maxLines": 3
+        "maxLines": 3,
+        "letterSpacing": -2.0
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 120,
+      "y": 960,
+      "width": 840,
+      "height": 220,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "Regular",
+        "fontFamily": "sans",
+        "color": "#5C2A14",
+        "align": "Center",
+        "maxLines": 4
       }
     },
     {
       "id": "cta",
       "type": "TEXT",
       "binding": "CTA",
-      "x": 160,
-      "y": 1320,
-      "width": 620,
-      "height": 84,
+      "x": 320,
+      "y": 1330,
+      "width": 440,
+      "height": 64,
       "zIndex": 3,
       "textStyle": {
-        "fontSize": 34,
+        "fontSize": 32,
         "fontWeight": "SemiBold",
+        "fontFamily": "sans",
         "color": "#FFFFFF",
+        "align": "Center",
+        "maxLines": 1,
+        "letterSpacing": 3.0
+      },
+      "pillBackground": {
+        "fillType": "themed",
+        "fillColors": ["#0E0E16"],
+        "cornerRadius": 50,
+        "paddingX": 48,
+        "paddingY": 22
+      }
+    },
+    {
+      "id": "footer_rule",
+      "type": "SHAPE",
+      "x": 470,
+      "y": 1620,
+      "width": 140,
+      "height": 2,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#E8A33D"]
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 72,
+      "y": 1660,
+      "width": 936,
+      "height": 64,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 36,
+        "fontWeight": "SemiBold",
+        "fontFamily": "serif",
+        "color": "#0E0E16",
         "align": "Center",
         "maxLines": 1
       }
@@ -46,17 +133,19 @@
       "id": "phone",
       "type": "TEXT",
       "binding": "PHONE",
-      "x": 90,
-      "y": 1680,
-      "width": 760,
-      "height": 44,
+      "x": 72,
+      "y": 1736,
+      "width": 936,
+      "height": 40,
       "zIndex": 3,
       "textStyle": {
-        "fontSize": 28,
+        "fontSize": 26,
         "fontWeight": "Regular",
-        "color": "#111827",
+        "fontFamily": "sans",
+        "color": "#5C2A14",
         "align": "Center",
-        "maxLines": 1
+        "maxLines": 1,
+        "letterSpacing": 2.0
       }
     }
   ]

@@ -1,28 +1,57 @@
 {
   "id": "new_arrival_square_clean",
-  "title": "New Arrival Clean Square",
+  "title": "Arrival — Editorial Minimal",
   "category": "NEW_ARRIVAL",
   "format": "SQUARE_1_1",
   "background": {
     "type": "solid",
-    "colors": ["#F8FAFC"]
+    "colors": ["#F4EFE3"]
   },
   "layers": [
+    {
+      "id": "ink_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 116,
+      "width": 96,
+      "height": 4,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#0E0E16"]
+      }
+    },
+    {
+      "id": "sindoor_dot",
+      "type": "SHAPE",
+      "x": 184,
+      "y": 110,
+      "width": 16,
+      "height": 16,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#B71C3A"],
+        "cornerRadius": 8
+      }
+    },
     {
       "id": "headline",
       "type": "TEXT",
       "binding": "HEADLINE",
       "x": 72,
-      "y": 160,
-      "width": 760,
-      "height": 160,
+      "y": 170,
+      "width": 936,
+      "height": 380,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 54,
+        "fontSize": 120,
         "fontWeight": "Bold",
-        "color": "#0F172A",
+        "fontFamily": "serif",
+        "color": "#0E0E16",
         "align": "Start",
-        "maxLines": 2
+        "maxLines": 3,
+        "letterSpacing": -2.0
       }
     },
     {
@@ -30,16 +59,56 @@
       "type": "TEXT",
       "binding": "CAPTION",
       "x": 72,
-      "y": 350,
-      "width": 720,
-      "height": 120,
+      "y": 580,
+      "width": 820,
+      "height": 200,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 30,
+        "fontSize": 32,
         "fontWeight": "Regular",
-        "color": "#475569",
+        "fontFamily": "sans",
+        "color": "#3F3624",
         "align": "Start",
-        "maxLines": 3
+        "maxLines": 4
+      }
+    },
+    {
+      "id": "cta",
+      "type": "TEXT",
+      "binding": "CTA",
+      "x": 72,
+      "y": 820,
+      "width": 320,
+      "height": 60,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 26,
+        "fontWeight": "SemiBold",
+        "fontFamily": "sans",
+        "color": "#FAF6EC",
+        "align": "Center",
+        "maxLines": 1,
+        "letterSpacing": 3.0
+      },
+      "pillBackground": {
+        "fillType": "themed",
+        "fillColors": ["#0E0E16"],
+        "cornerRadius": 40,
+        "paddingX": 36,
+        "paddingY": 18
+      }
+    },
+    {
+      "id": "footer_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 920,
+      "width": 936,
+      "height": 1,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#400E0E16"]
       }
     },
     {
@@ -47,16 +116,36 @@
       "type": "TEXT",
       "binding": "BUSINESS_NAME",
       "x": 72,
-      "y": 900,
-      "width": 560,
+      "y": 950,
+      "width": 720,
       "height": 56,
       "zIndex": 3,
       "textStyle": {
-        "fontSize": 34,
+        "fontSize": 32,
         "fontWeight": "SemiBold",
-        "color": "#0F172A",
+        "fontFamily": "serif",
+        "color": "#0E0E16",
         "align": "Start",
         "maxLines": 1
+      }
+    },
+    {
+      "id": "phone",
+      "type": "TEXT",
+      "binding": "PHONE",
+      "x": 72,
+      "y": 1020,
+      "width": 720,
+      "height": 36,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 22,
+        "fontWeight": "Regular",
+        "fontFamily": "sans",
+        "color": "#3F3624",
+        "align": "Start",
+        "maxLines": 1,
+        "letterSpacing": 1.5
       }
     }
   ]

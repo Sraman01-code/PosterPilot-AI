@@ -1,60 +1,104 @@
 {
   "id": "festival_square_lights",
-  "title": "Festival Lights Square",
+  "title": "Lights — Editorial Block",
   "category": "FESTIVAL",
   "format": "SQUARE_1_1",
   "background": {
     "type": "gradient",
-    "colors": ["#FFF7ED", "#FDBA74"]
+    "colors": ["#FFF7E8", "#F5DCB7"]
   },
   "layers": [
+    {
+      "id": "corner_block",
+      "type": "SHAPE",
+      "x": 820,
+      "y": -40,
+      "width": 280,
+      "height": 280,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "gradient",
+        "fillColors": ["#E8A33D", "#B71C3A"],
+        "cornerRadius": 18
+      }
+    },
+    {
+      "id": "eyebrow_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 130,
+      "width": 80,
+      "height": 4,
+      "zIndex": 2,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#B71C3A"]
+      }
+    },
     {
       "id": "headline",
       "type": "TEXT",
       "binding": "HEADLINE",
-      "x": 64,
-      "y": 140,
+      "x": 72,
+      "y": 180,
       "width": 820,
-      "height": 180,
+      "height": 380,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 56,
+        "fontSize": 110,
         "fontWeight": "Bold",
-        "color": "#1F2937",
+        "fontFamily": "serif",
+        "color": "#0E0E16",
         "align": "Start",
-        "maxLines": 2
+        "maxLines": 3,
+        "letterSpacing": -2.0
       }
     },
     {
       "id": "caption",
       "type": "TEXT",
       "binding": "CAPTION",
-      "x": 64,
-      "y": 360,
-      "width": 760,
-      "height": 120,
+      "x": 72,
+      "y": 580,
+      "width": 820,
+      "height": 200,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 30,
+        "fontSize": 32,
         "fontWeight": "Regular",
-        "color": "#374151",
+        "fontFamily": "sans",
+        "color": "#3F3624",
         "align": "Start",
-        "maxLines": 3
+        "maxLines": 4
+      }
+    },
+    {
+      "id": "footer_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 880,
+      "width": 60,
+      "height": 2,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#E8A33D"]
       }
     },
     {
       "id": "business_name",
       "type": "TEXT",
       "binding": "BUSINESS_NAME",
-      "x": 64,
-      "y": 900,
-      "width": 560,
+      "x": 72,
+      "y": 906,
+      "width": 720,
       "height": 56,
       "zIndex": 3,
       "textStyle": {
-        "fontSize": 34,
+        "fontSize": 32,
         "fontWeight": "SemiBold",
-        "color": "#1F2937",
+        "fontFamily": "serif",
+        "color": "#0E0E16",
         "align": "Start",
         "maxLines": 1
       }
@@ -63,17 +107,19 @@
       "id": "phone",
       "type": "TEXT",
       "binding": "PHONE",
-      "x": 64,
-      "y": 970,
-      "width": 420,
+      "x": 72,
+      "y": 974,
+      "width": 560,
       "height": 40,
       "zIndex": 3,
       "textStyle": {
         "fontSize": 24,
         "fontWeight": "Regular",
-        "color": "#374151",
+        "fontFamily": "sans",
+        "color": "#3F3624",
         "align": "Start",
-        "maxLines": 1
+        "maxLines": 1,
+        "letterSpacing": 1.5
       }
     }
   ]

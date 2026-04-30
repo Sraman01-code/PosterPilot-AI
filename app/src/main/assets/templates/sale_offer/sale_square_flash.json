@@ -1,61 +1,131 @@
 {
   "id": "sale_square_flash",
-  "title": "Flash Sale Square",
+  "title": "Flash Sale — Bold Ink",
   "category": "SALE_OFFER",
   "format": "SQUARE_1_1",
   "background": {
-    "type": "gradient",
-    "colors": ["#EFF6FF", "#2563EB"]
+    "type": "solid",
+    "colors": ["#0E0E16"]
   },
   "layers": [
+    {
+      "id": "corner_block",
+      "type": "SHAPE",
+      "x": 700,
+      "y": -40,
+      "width": 420,
+      "height": 420,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "gradient",
+        "fillColors": ["#E8A33D", "#B71C3A"],
+        "cornerRadius": 22
+      }
+    },
+    {
+      "id": "eyebrow_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 130,
+      "width": 80,
+      "height": 4,
+      "zIndex": 2,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#E8A33D"]
+      }
+    },
     {
       "id": "headline",
       "type": "TEXT",
       "binding": "HEADLINE",
-      "x": 64,
-      "y": 160,
-      "width": 780,
-      "height": 170,
+      "x": 72,
+      "y": 180,
+      "width": 600,
+      "height": 380,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 58,
+        "fontSize": 124,
         "fontWeight": "Bold",
-        "color": "#111827",
+        "fontFamily": "serif",
+        "color": "#FAF6EC",
         "align": "Start",
-        "maxLines": 2
+        "maxLines": 3,
+        "letterSpacing": -2.0
       }
     },
     {
       "id": "caption",
       "type": "TEXT",
       "binding": "CAPTION",
-      "x": 64,
-      "y": 360,
-      "width": 700,
-      "height": 120,
+      "x": 72,
+      "y": 600,
+      "width": 760,
+      "height": 200,
       "zIndex": 2,
       "textStyle": {
-        "fontSize": 30,
+        "fontSize": 32,
         "fontWeight": "Regular",
-        "color": "#1F2937",
+        "fontFamily": "sans",
+        "color": "#C8BDA3",
         "align": "Start",
-        "maxLines": 3
+        "maxLines": 4
       }
     },
     {
       "id": "cta",
       "type": "TEXT",
       "binding": "CTA",
-      "x": 64,
-      "y": 760,
-      "width": 420,
-      "height": 72,
+      "x": 72,
+      "y": 820,
+      "width": 360,
+      "height": 64,
       "zIndex": 3,
       "textStyle": {
         "fontSize": 30,
         "fontWeight": "SemiBold",
-        "color": "#FFFFFF",
+        "fontFamily": "sans",
+        "color": "#0E0E16",
         "align": "Center",
+        "maxLines": 1,
+        "letterSpacing": 3.0
+      },
+      "pillBackground": {
+        "fillType": "themed",
+        "fillColors": ["#E8A33D"],
+        "cornerRadius": 46,
+        "paddingX": 44,
+        "paddingY": 20
+      }
+    },
+    {
+      "id": "footer_rule",
+      "type": "SHAPE",
+      "x": 72,
+      "y": 980,
+      "width": 936,
+      "height": 1,
+      "zIndex": 1,
+      "shapeStyle": {
+        "fillType": "solid",
+        "fillColors": ["#33FAF6EC"]
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 72,
+      "y": 1000,
+      "width": 720,
+      "height": 60,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 32,
+        "fontWeight": "SemiBold",
+        "fontFamily": "serif",
+        "color": "#FAF6EC",
+        "align": "Start",
         "maxLines": 1
       }
     }
