@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.opengraphlabs.posterpilot.core.model.AppLanguage
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.data.local.BusinessProfileState
+import com.opengraphlabs.posterpilot.feature.editor.EditorScreen
 import com.opengraphlabs.posterpilot.feature.home.HomeScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.BusinessSetupScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.LanguageSelectionScreen
@@ -85,6 +86,19 @@ fun PosterPilotNavGraph(
             TemplatePreviewScreen(
                 templateId = backStackEntry.arguments
                     ?.getString(PosterPilotRoute.TemplatePreview.TemplateIdArg)
+                    .orEmpty(),
+                businessProfile = businessProfile,
+                onEdit = { templateId ->
+                    navController.navigate(PosterPilotRoute.Editor.createRoute(templateId))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(PosterPilotRoute.Editor.route) { backStackEntry ->
+            EditorScreen(
+                templateId = backStackEntry.arguments
+                    ?.getString(PosterPilotRoute.Editor.TemplateIdArg)
                     .orEmpty(),
                 businessProfile = businessProfile,
                 onBack = { navController.popBackStack() }

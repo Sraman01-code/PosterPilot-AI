@@ -11,4 +11,10 @@ sealed class PosterPilotRoute(val route: String) {
 
         fun createRoute(templateId: String): String = "template_preview/$templateId"
     }
+
+    data object Editor : PosterPilotRoute("editor/{templateId}") {
+        const val TemplateIdArg = "templateId"
+
+        fun createRoute(templateId: String): String = "editor/$templateId"
+    }
 }

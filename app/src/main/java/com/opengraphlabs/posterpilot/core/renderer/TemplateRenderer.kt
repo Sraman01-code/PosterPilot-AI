@@ -26,6 +26,7 @@ import androidx.compose.ui.zIndex
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.LayerType
 import com.opengraphlabs.posterpilot.core.model.PlaceholderBinding
+import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.model.TemplateLayer
@@ -36,9 +37,9 @@ private const val SquareCanvasHeight = 1080f
 private const val StoryCanvasHeight = 1920f
 
 data class TemplateCopy(
-    val headline: String = "Special Offer Today",
-    val caption: String = "Create beautiful posts for your business in seconds.",
-    val cta: String = "Contact us now"
+    val headline: String = PosterDraft.DefaultHeadline,
+    val caption: String = PosterDraft.DefaultCaption,
+    val cta: String = PosterDraft.DefaultCta
 )
 
 @Composable
@@ -46,10 +47,17 @@ fun TemplateRenderer(
     template: PosterTemplate,
     businessProfile: BusinessProfile?,
     modifier: Modifier = Modifier,
+    draft: PosterDraft? = null,
     copy: TemplateCopy = TemplateCopy()
 ) {
     val canvasHeight = template.format.canvasHeight()
     val aspectRatio = CanvasWidth / canvasHeight
+    val resolvedCopy = draft.resolveCopy(copy)
+    val logoScale = draft?.logoScale?.coerceIn(0.5f, 2f) ?: 1f
+    val logoOffsetX = draft?.logoOffsetX ?: 0f
+    val logoOffsetY = draft?.logoOffsetY ?: 0f
+    val themeColorHex = draft?.themeColorHex?.takeIf { it.isNotBlank() }
+        ?: businessProfile?.brandColorHex
 
     BoxWithConstraints(
         modifier = modifier
@@ -70,16 +78,24 @@ fun TemplateRenderer(
                     scaleY = scaleY,
                     fontScale = fontScale,
                     businessProfile = businessProfile,
-                    copy = copy
+                    copy = resolvedCopy,
+                    themeColorHex = themeColorHex,
+                    logoScale = logoScale,
+                    logoOffsetX = logoOffsetX,
+                    logoOffsetY = logoOffsetY
                 )
             }
 
         if (template.layers.none { it.binding == PlaceholderBinding.LOGO }) {
             LogoPlaceholder(
                 businessProfile = businessProfile,
+                themeColorHex = themeColorHex,
                 modifier = Modifier
-                    .offset(x = (CanvasWidth - 170f).scaledDp(scaleX), y = 64f.scaledDp(scaleY))
-                    .size(104f.scaledDp(minOf(scaleX, scaleY)))
+                    .offset(
+                        x = (CanvasWidth - 170f + logoOffsetX).scaledDp(scaleX),
+                        y = (64f + logoOffsetY).scaledDp(scaleY)
+                    )
+                    .size((104f * logoScale).scaledDp(minOf(scaleX, scaleY)))
                     .zIndex(10f)
             )
         }
@@ -93,7 +109,11 @@ private fun RenderLayerSafely(
     scaleY: Float,
     fontScale: Float,
     businessProfile: BusinessProfile?,
-    copy: TemplateCopy
+    copy: TemplateCopy,
+    themeColorHex: String?,
+    logoScale: Float,
+    logoOffsetX: Float,
+    logoOffsetY: Float
 ) {
     if (layer.width <= 0 || layer.height <= 0) return
 
@@ -104,14 +124,22 @@ private fun RenderLayerSafely(
             scaleY = scaleY,
             fontScale = fontScale,
             businessProfile = businessProfile,
-            copy = copy
+            copy = copy,
+            themeColorHex = themeColorHex
         )
 
         LayerType.IMAGE -> {
             if (layer.binding == PlaceholderBinding.LOGO) {
                 LogoPlaceholder(
                     businessProfile = businessProfile,
-                    modifier = layer.scaledModifier(scaleX, scaleY)
+                    themeColorHex = themeColorHex,
+                    modifier = layer.scaledModifier(
+                        scaleX = scaleX,
+                        scaleY = scaleY,
+                        sizeScale = logoScale,
+                        offsetX = logoOffsetX,
+                        offsetY = logoOffsetY
+                    )
                 )
             }
         }
@@ -127,7 +155,8 @@ private fun RenderTextLayer(
     scaleY: Float,
     fontScale: Float,
     businessProfile: BusinessProfile?,
-    copy: TemplateCopy
+    copy: TemplateCopy,
+    themeColorHex: String?
 ) {
     val text = layer.binding.resolveText(businessProfile, copy)
     if (text.isBlank()) return
@@ -137,7 +166,7 @@ private fun RenderTextLayer(
     Text(
         modifier = layer.scaledModifier(scaleX, scaleY),
         text = text,
-        color = parseColor(textStyle.color, Color(0xFF111827)),
+        color = layer.resolveTextColor(textStyle, themeColorHex),
         fontSize = (textStyle.fontSize.coerceAtLeast(1) * fontScale).sp,
         fontWeight = textStyle.fontWeight.toComposeFontWeight(),
         textAlign = textStyle.align.toComposeTextAlign(),
@@ -150,12 +179,13 @@ private fun RenderTextLayer(
 @Composable
 private fun LogoPlaceholder(
     businessProfile: BusinessProfile?,
+    themeColorHex: String?,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(parseColor(businessProfile?.brandColorHex, Color(0xFFF7B733))),
+            .background(parseColor(themeColorHex, Color(0xFFF7B733))),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -167,14 +197,26 @@ private fun LogoPlaceholder(
     }
 }
 
-private fun TemplateLayer.scaledModifier(scaleX: Float, scaleY: Float): Modifier =
+private fun TemplateLayer.scaledModifier(
+    scaleX: Float,
+    scaleY: Float,
+    sizeScale: Float = 1f,
+    offsetX: Float = 0f,
+    offsetY: Float = 0f
+): Modifier =
     Modifier
-        .offset(x = x.toFloat().scaledDp(scaleX), y = y.toFloat().scaledDp(scaleY))
-        .size(width = width.toFloat().scaledDp(scaleX), height = height.toFloat().scaledDp(scaleY))
+        .offset(
+            x = (x.toFloat() + offsetX).scaledDp(scaleX),
+            y = (y.toFloat() + offsetY).scaledDp(scaleY)
+        )
+        .size(
+            width = (width.toFloat() * sizeScale.coerceAtLeast(0.1f)).scaledDp(scaleX),
+            height = (height.toFloat() * sizeScale.coerceAtLeast(0.1f)).scaledDp(scaleY)
+        )
         .zIndex(zIndex.toFloat())
 
 private fun Float.scaledDp(scale: Float): Dp =
-    (coerceAtLeast(0f) * scale.coerceAtLeast(0f)).dp
+    (this * scale.coerceAtLeast(0f)).dp
 
 private fun PosterFormat.canvasHeight(): Float =
     when (this) {
@@ -203,6 +245,26 @@ private fun PlaceholderBinding?.resolveText(
         PlaceholderBinding.PHONE -> businessProfile?.phone.orEmpty().ifBlank { "Phone number" }
         PlaceholderBinding.LOGO, null -> ""
     }
+
+private fun PosterDraft?.resolveCopy(fallback: TemplateCopy): TemplateCopy =
+    TemplateCopy(
+        headline = this?.headline?.ifBlank { PosterDraft.DefaultHeadline } ?: fallback.headline,
+        caption = this?.caption?.ifBlank { PosterDraft.DefaultCaption } ?: fallback.caption,
+        cta = this?.cta?.ifBlank { PosterDraft.DefaultCta } ?: fallback.cta
+    )
+
+private fun TemplateLayer.resolveTextColor(
+    textStyle: TemplateTextStyle,
+    themeColorHex: String?
+): Color {
+    val themedColor = if (binding == PlaceholderBinding.CTA) {
+        parseColorOrNull(themeColorHex)
+    } else {
+        null
+    }
+
+    return themedColor ?: parseColor(textStyle.color, Color(0xFF111827))
+}
 
 private fun BusinessProfile?.initials(): String {
     val name = this?.businessName.orEmpty()

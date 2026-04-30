@@ -31,6 +31,7 @@ import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 fun TemplatePreviewScreen(
     templateId: String,
     businessProfile: BusinessProfile?,
+    onEdit: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -68,7 +69,8 @@ fun TemplatePreviewScreen(
                 } else {
                     TemplatePreviewContent(
                         template = loadedTemplate,
-                        businessProfile = businessProfile
+                        businessProfile = businessProfile,
+                        onEdit = onEdit
                     )
                 }
             }
@@ -79,7 +81,8 @@ fun TemplatePreviewScreen(
 @Composable
 private fun TemplatePreviewContent(
     template: PosterTemplate,
-    businessProfile: BusinessProfile?
+    businessProfile: BusinessProfile?,
+    onEdit: (String) -> Unit
 ) {
     Text(
         text = template.title,
@@ -108,5 +111,12 @@ private fun TemplatePreviewContent(
                 .fillMaxWidth()
                 .padding(12.dp)
         )
+    }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onEdit(template.id) }
+    ) {
+        Text(text = "Edit poster")
     }
 }
