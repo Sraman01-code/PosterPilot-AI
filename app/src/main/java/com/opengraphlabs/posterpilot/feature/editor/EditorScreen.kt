@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsEvents
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.export.PosterBitmapExporter
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
@@ -67,6 +69,7 @@ private sealed interface AiCopyState {
 fun EditorScreen(
     templateId: String,
     businessProfile: BusinessProfile?,
+    analyticsTracker: AnalyticsTracker,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -77,6 +80,7 @@ fun EditorScreen(
     val aiCopyRepository = remember { AiCopyRepository() }
     var template by remember { mutableStateOf<PosterTemplate?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var loadError by remember { mutableStateOf<String?>(null) }
     var exportState by remember { mutableStateOf<ExportState>(ExportState.Idle) }
     var aiCopyState by remember { mutableStateOf<AiCopyState>(AiCopyState.Idle) }
     var draft by remember(templateId, businessProfile?.brandColorHex) {
@@ -89,7 +93,25 @@ fun EditorScreen(
     }
 
     LaunchedEffect(templateId, repository) {
-        template = repository.getTemplate(templateId)
+        runCatching {
+            repository.getTemplate(templateId)
+        }.onSuccess { loadedTemplate ->
+            template = loadedTemplate
+            loadError = null
+            loadedTemplate?.let {
+                analyticsTracker.track(
+                    event = AnalyticsEvents.EditorOpened,
+                    params = mapOf(
+                        "templateId" to it.id,
+                        "category" to it.category.name,
+                        "format" to it.format.name
+                    )
+                )
+            }
+        }.onFailure { throwable ->
+            template = null
+            loadError = throwable.message ?: "Unable to load editor."
+        }
         isLoading = false
     }
 
@@ -118,7 +140,15 @@ fun EditorScreen(
                 }
             } else {
                 val loadedTemplate = template
-                if (loadedTemplate == null) {
+                if (loadError != null) {
+                    item {
+                        Text(
+                            text = loadError ?: "Unable to load editor.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else if (loadedTemplate == null) {
                     item {
                         Text(
                             text = "Template not found",
@@ -140,6 +170,13 @@ fun EditorScreen(
                                 aiCopyState = AiCopyState.Idle
                             },
                             onGenerateAiCopy = {
+                                analyticsTracker.track(
+                                    event = AnalyticsEvents.AiCopyRequested,
+                                    params = mapOf(
+                                        "templateId" to loadedTemplate.id,
+                                        "category" to loadedTemplate.category.name
+                                    )
+                                )
                                 aiCopyState = AiCopyState.Loading
                                 coroutineScope.launch {
                                     val result = runCatching {
@@ -160,15 +197,36 @@ fun EditorScreen(
                                                 AiCopySource.Backend -> AiCopyState.Success("AI copy applied.")
                                                 AiCopySource.Mock -> AiCopyState.Success("Sample copy applied.")
                                             }
+                                            analyticsTracker.track(
+                                                event = AnalyticsEvents.AiCopySuccess,
+                                                params = mapOf(
+                                                    "templateId" to loadedTemplate.id,
+                                                    "source" to aiResult.source.name
+                                                )
+                                            )
                                         }
                                         .onFailure { throwable ->
-                                            aiCopyState = AiCopyState.Error(
-                                                throwable.message ?: "AI copy failed. You can keep editing manually."
+                                            val message = throwable.message
+                                                ?: "AI copy failed. You can keep editing manually."
+                                            aiCopyState = AiCopyState.Error(message)
+                                            analyticsTracker.track(
+                                                event = AnalyticsEvents.AiCopyFailed,
+                                                params = mapOf(
+                                                    "templateId" to loadedTemplate.id,
+                                                    "message" to message
+                                                )
                                             )
                                         }
                                 }
                             },
                             onExport = {
+                                analyticsTracker.track(
+                                    event = AnalyticsEvents.ExportStarted,
+                                    params = mapOf(
+                                        "templateId" to loadedTemplate.id,
+                                        "format" to loadedTemplate.format.name
+                                    )
+                                )
                                 exportState = ExportState.Exporting
                                 coroutineScope.launch {
                                     exportState = runCatching {
@@ -185,15 +243,34 @@ fun EditorScreen(
                                             )
                                             exportedFile
                                         }
+                                        analyticsTracker.track(
+                                            event = AnalyticsEvents.ExportSuccess,
+                                            params = mapOf(
+                                                "templateId" to loadedTemplate.id,
+                                                "format" to loadedTemplate.format.name
+                                            )
+                                        )
                                         ExportState.Success(file)
                                     }.getOrElse { throwable ->
-                                        ExportState.Error(
-                                            throwable.message ?: "Export failed"
+                                        val message = throwable.message ?: "Export failed"
+                                        analyticsTracker.track(
+                                            event = AnalyticsEvents.ExportFailed,
+                                            params = mapOf(
+                                                "templateId" to loadedTemplate.id,
+                                                "message" to message
+                                            )
                                         )
+                                        ExportState.Error(message)
                                     }
                                 }
                             },
-                            onShare = { file -> sharePoster(context, file) },
+                            onShare = { file ->
+                                analyticsTracker.track(
+                                    event = AnalyticsEvents.ShareSheetOpened,
+                                    params = mapOf("templateId" to loadedTemplate.id)
+                                )
+                                sharePoster(context, file)
+                            },
                             onCreateAnother = onBack
                         )
                     }

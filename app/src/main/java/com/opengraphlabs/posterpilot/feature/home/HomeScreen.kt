@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsEvents
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterCategory
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
@@ -31,6 +33,7 @@ import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 @Composable
 fun HomeScreen(
     businessProfile: BusinessProfile?,
+    analyticsTracker: AnalyticsTracker,
     onTemplateSelected: (String) -> Unit,
     onHistorySelected: () -> Unit
 ) {
@@ -38,9 +41,19 @@ fun HomeScreen(
     val repository = remember { TemplateRepository(context.applicationContext) }
     var templates by remember { mutableStateOf(emptyList<PosterTemplate>()) }
     var isLoading by remember { mutableStateOf(true) }
+    var loadError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(repository) {
-        templates = repository.loadTemplates()
+        analyticsTracker.track(AnalyticsEvents.HomeViewed)
+        runCatching {
+            repository.loadTemplates()
+        }.onSuccess { loadedTemplates ->
+            templates = loadedTemplates
+            loadError = null
+        }.onFailure { throwable ->
+            templates = emptyList()
+            loadError = throwable.message ?: "Unable to load templates."
+        }
         isLoading = false
     }
 
@@ -75,6 +88,14 @@ fun HomeScreen(
                 item {
                     Text(
                         text = "Loading templates...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else if (loadError != null) {
+                item {
+                    Text(
+                        text = loadError ?: "Unable to load templates.",
+                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

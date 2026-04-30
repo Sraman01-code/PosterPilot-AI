@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsEvents
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
@@ -36,6 +38,7 @@ import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 fun TemplatePreviewScreen(
     templateId: String,
     businessProfile: BusinessProfile?,
+    analyticsTracker: AnalyticsTracker,
     onEdit: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -43,9 +46,28 @@ fun TemplatePreviewScreen(
     val repository = remember { TemplateRepository(context.applicationContext) }
     var template by remember { mutableStateOf<PosterTemplate?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var loadError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(templateId, repository) {
-        template = repository.getTemplate(templateId)
+        runCatching {
+            repository.getTemplate(templateId)
+        }.onSuccess { loadedTemplate ->
+            template = loadedTemplate
+            loadError = null
+            loadedTemplate?.let {
+                analyticsTracker.track(
+                    event = AnalyticsEvents.TemplateOpened,
+                    params = mapOf(
+                        "templateId" to it.id,
+                        "category" to it.category.name,
+                        "format" to it.format.name
+                    )
+                )
+            }
+        }.onFailure { throwable ->
+            template = null
+            loadError = throwable.message ?: "Unable to load template."
+        }
         isLoading = false
     }
 
@@ -89,7 +111,15 @@ fun TemplatePreviewScreen(
                 }
             } else {
                 val loadedTemplate = template
-                if (loadedTemplate == null) {
+                if (loadError != null) {
+                    item {
+                        Text(
+                            text = loadError ?: "Unable to load template.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else if (loadedTemplate == null) {
                     item {
                         Text(
                             text = "Template not found",

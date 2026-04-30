@@ -20,9 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -31,6 +34,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsEvents
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.share.sharePoster
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
 import com.opengraphlabs.posterpilot.data.local.history.ExportedPosterEntity
@@ -41,10 +46,18 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HistoryScreen(onBack: () -> Unit) {
+fun HistoryScreen(
+    analyticsTracker: AnalyticsTracker,
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
     val repository = remember { HistoryRepository(context.applicationContext) }
     val posters by repository.observeRecent().collectAsState(initial = emptyList())
+    var shareError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        analyticsTracker.track(AnalyticsEvents.HistoryOpened)
+    }
 
     PosterPilotScaffold {
         LazyColumn(
@@ -64,6 +77,16 @@ fun HistoryScreen(onBack: () -> Unit) {
                 )
             }
 
+            shareError?.let { message ->
+                item {
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
             if (posters.isEmpty()) {
                 item {
                     Text(
@@ -79,7 +102,17 @@ fun HistoryScreen(onBack: () -> Unit) {
                     HistoryItem(
                         poster = poster,
                         onShare = {
-                            sharePoster(context, File(poster.imagePath))
+                            val file = File(poster.imagePath)
+                            if (file.exists()) {
+                                shareError = null
+                                analyticsTracker.track(
+                                    event = AnalyticsEvents.HistoryShareOpened,
+                                    params = mapOf("posterId" to poster.id.toString())
+                                )
+                                sharePoster(context, file)
+                            } else {
+                                shareError = "Exported PNG is no longer available on this device."
+                            }
                         }
                     )
                 }

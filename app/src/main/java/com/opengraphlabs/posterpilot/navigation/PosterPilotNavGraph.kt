@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.model.AppLanguage
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.data.local.BusinessProfileState
@@ -21,6 +22,7 @@ fun PosterPilotNavGraph(
     profileState: BusinessProfileState,
     selectedLanguage: AppLanguage?,
     businessProfile: BusinessProfile?,
+    analyticsTracker: AnalyticsTracker,
     onLanguageSelected: (AppLanguage) -> Unit,
     onBusinessProfileSaved: (BusinessProfile) -> Unit
 ) {
@@ -77,6 +79,7 @@ fun PosterPilotNavGraph(
         composable(PosterPilotRoute.Home.route) {
             HomeScreen(
                 businessProfile = businessProfile,
+                analyticsTracker = analyticsTracker,
                 onTemplateSelected = { templateId ->
                     navController.navigate(PosterPilotRoute.TemplatePreview.createRoute(templateId))
                 },
@@ -88,6 +91,7 @@ fun PosterPilotNavGraph(
 
         composable(PosterPilotRoute.History.route) {
             HistoryScreen(
+                analyticsTracker = analyticsTracker,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -98,6 +102,7 @@ fun PosterPilotNavGraph(
                     ?.getString(PosterPilotRoute.TemplatePreview.TemplateIdArg)
                     .orEmpty(),
                 businessProfile = businessProfile,
+                analyticsTracker = analyticsTracker,
                 onEdit = { templateId ->
                     navController.navigate(PosterPilotRoute.Editor.createRoute(templateId))
                 },
@@ -111,6 +116,7 @@ fun PosterPilotNavGraph(
                     ?.getString(PosterPilotRoute.Editor.TemplateIdArg)
                     .orEmpty(),
                 businessProfile = businessProfile,
+                analyticsTracker = analyticsTracker,
                 onBack = { navController.popBackStack() }
             )
         }
