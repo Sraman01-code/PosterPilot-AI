@@ -8,6 +8,8 @@ import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.model.TemplateBackground
 import com.opengraphlabs.posterpilot.core.model.TemplateLayer
+import com.opengraphlabs.posterpilot.core.model.TemplatePillBackground
+import com.opengraphlabs.posterpilot.core.model.TemplateShapeStyle
 import com.opengraphlabs.posterpilot.core.model.TemplateTextStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -79,7 +81,9 @@ class TemplateRepository(private val context: Context) {
                 width = layer.getInt("width"),
                 height = layer.getInt("height"),
                 zIndex = layer.optInt("zIndex", 0),
-                textStyle = layer.optJSONObject("textStyle")?.let(::parseTextStyle)
+                textStyle = layer.optJSONObject("textStyle")?.let(::parseTextStyle),
+                shapeStyle = layer.optJSONObject("shapeStyle")?.let(::parseShapeStyle),
+                pillBackground = layer.optJSONObject("pillBackground")?.let(::parsePillBackground)
             )
         }
 
@@ -89,7 +93,27 @@ class TemplateRepository(private val context: Context) {
             fontWeight = json.optString("fontWeight", "Regular"),
             color = json.getString("color"),
             align = json.optString("align", "Start"),
-            maxLines = json.optInt("maxLines", 1)
+            maxLines = json.optInt("maxLines", 1),
+            letterSpacing = json.optDouble("letterSpacing", 0.0).toFloat(),
+            fontFamily = json.optString("fontFamily", "sans")
+        )
+
+    private fun parseShapeStyle(json: JSONObject): TemplateShapeStyle =
+        TemplateShapeStyle(
+            fillType = json.optString("fillType", "solid"),
+            fillColors = json.optJSONArray("fillColors")?.toStringList().orEmpty(),
+            cornerRadius = json.optInt("cornerRadius", 0),
+            strokeColor = json.optString("strokeColor").takeIf { it.isNotBlank() },
+            strokeWidth = json.optInt("strokeWidth", 0)
+        )
+
+    private fun parsePillBackground(json: JSONObject): TemplatePillBackground =
+        TemplatePillBackground(
+            fillType = json.optString("fillType", "solid"),
+            fillColors = json.optJSONArray("fillColors")?.toStringList().orEmpty(),
+            cornerRadius = json.optInt("cornerRadius", 0),
+            paddingX = json.optInt("paddingX", 0),
+            paddingY = json.optInt("paddingY", 0)
         )
 
     private inline fun <reified T : Enum<T>> enumValueOf(value: String): T =

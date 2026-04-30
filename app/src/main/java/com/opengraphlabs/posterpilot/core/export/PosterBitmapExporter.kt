@@ -20,6 +20,8 @@ import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.model.TemplateLayer
+import com.opengraphlabs.posterpilot.core.model.TemplatePillBackground
+import com.opengraphlabs.posterpilot.core.model.TemplateShapeStyle
 import com.opengraphlabs.posterpilot.core.model.TemplateTextStyle
 import java.io.File
 import java.io.FileOutputStream
@@ -48,7 +50,7 @@ class PosterBitmapExporter(private val context: Context) {
                         LayerType.IMAGE -> if (layer.binding == PlaceholderBinding.LOGO) {
                             drawLogo(canvas, layer, businessProfile, draft)
                         }
-                        LayerType.SHAPE -> Unit
+                        LayerType.SHAPE -> drawShapeLayer(canvas, layer, draft.themeColorHex)
                     }
                 }
             }
@@ -92,6 +94,36 @@ class PosterBitmapExporter(private val context: Context) {
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
     }
 
+    private fun drawShapeLayer(
+        canvas: Canvas,
+        layer: TemplateLayer,
+        themeColorHex: String?
+    ) {
+        val style = layer.shapeStyle ?: return
+        val rect = RectF(
+            layer.x.toFloat(),
+            layer.y.toFloat(),
+            (layer.x + layer.width).toFloat(),
+            (layer.y + layer.height).toFloat()
+        )
+        val radius = style.cornerRadius.toFloat().coerceAtLeast(0f)
+
+        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            applyFill(style.fillType, style.fillColors, themeColorHex, rect)
+        }
+        canvas.drawRoundRect(rect, radius, radius, fillPaint)
+
+        val strokeColor = parseColorOrNull(style.strokeColor)
+        if (strokeColor != null && style.strokeWidth > 0) {
+            val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.style = Paint.Style.STROKE
+                this.strokeWidth = style.strokeWidth.toFloat()
+                this.color = strokeColor
+            }
+            canvas.drawRoundRect(rect, radius, radius, strokePaint)
+        }
+    }
+
     private fun drawTextLayer(
         canvas: Canvas,
         layer: TemplateLayer,
@@ -104,10 +136,19 @@ class PosterBitmapExporter(private val context: Context) {
         val text = layer.binding.resolveText(businessProfile, draft)
         if (text.isBlank()) return
 
+        layer.pillBackground?.let { pill ->
+            drawPillBackground(canvas, layer, pill, draft.themeColorHex)
+        }
+
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = layer.resolveTextColor(textStyle, draft.themeColorHex)
             textSize = textStyle.fontSize.coerceAtLeast(1).toFloat()
-            typeface = textStyle.fontWeight.toTypeface()
+            typeface = textStyle.toTypeface()
+            letterSpacing = if (textStyle.fontSize > 0) {
+                (textStyle.letterSpacing / textStyle.fontSize.toFloat()).coerceIn(-0.1f, 0.5f)
+            } else {
+                0f
+            }
         }
 
         val alignment = textStyle.align.toLayoutAlignment()
@@ -129,6 +170,25 @@ class PosterBitmapExporter(private val context: Context) {
         canvas.translate(layer.x.toFloat(), layer.y.toFloat())
         layout.draw(canvas)
         canvas.restoreToCount(saveCount)
+    }
+
+    private fun drawPillBackground(
+        canvas: Canvas,
+        layer: TemplateLayer,
+        pill: TemplatePillBackground,
+        themeColorHex: String?
+    ) {
+        val rect = RectF(
+            (layer.x - pill.paddingX).toFloat(),
+            (layer.y - pill.paddingY).toFloat(),
+            (layer.x + layer.width + pill.paddingX).toFloat(),
+            (layer.y + layer.height + pill.paddingY).toFloat()
+        )
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            applyFill(pill.fillType, pill.fillColors, themeColorHex, rect)
+        }
+        val radius = pill.cornerRadius.toFloat().coerceAtLeast(0f)
+        canvas.drawRoundRect(rect, radius, radius, paint)
     }
 
     private fun drawLogo(
@@ -173,7 +233,7 @@ class PosterBitmapExporter(private val context: Context) {
         bounds: RectF
     ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = parseColor(themeColorHex ?: businessProfile?.brandColorHex, Color.rgb(247, 183, 51))
+            color = parseColor(themeColorHex ?: businessProfile?.brandColorHex, Color.rgb(232, 163, 61))
         }
         canvas.drawOval(bounds, paint)
 
@@ -186,6 +246,43 @@ class PosterBitmapExporter(private val context: Context) {
         }
         val centerY = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f
         canvas.drawText(initials, bounds.centerX(), centerY, textPaint)
+    }
+}
+
+private fun Paint.applyFill(
+    fillType: String,
+    fillColors: List<String>,
+    themeColorHex: String?,
+    rect: RectF
+) {
+    when (fillType.lowercase()) {
+        "themed" -> {
+            color = parseColorOrNull(themeColorHex)
+                ?: parseColorOrNull(fillColors.firstOrNull())
+                ?: Color.LTGRAY
+            shader = null
+        }
+        "gradient" -> {
+            val colors = fillColors.mapNotNull { parseColorOrNull(it) }
+            if (colors.size >= 2) {
+                shader = LinearGradient(
+                    rect.left,
+                    rect.top,
+                    rect.right,
+                    rect.bottom,
+                    colors.toIntArray(),
+                    null,
+                    Shader.TileMode.CLAMP
+                )
+            } else {
+                color = colors.firstOrNull() ?: Color.LTGRAY
+                shader = null
+            }
+        }
+        else -> {
+            color = parseColorOrNull(fillColors.firstOrNull()) ?: Color.LTGRAY
+            shader = null
+        }
     }
 }
 
@@ -206,7 +303,13 @@ private fun TemplateLayer.resolveTextColor(
     textStyle: TemplateTextStyle,
     themeColorHex: String?
 ): Int {
-    val themedColor = if (binding == PlaceholderBinding.CTA) {
+    val themedColor = if (
+        binding == PlaceholderBinding.CTA &&
+        pillBackground == null &&
+        !textStyle.color.equals("themed", ignoreCase = true)
+    ) {
+        parseColorOrNull(themeColorHex)
+    } else if (textStyle.color.equals("themed", ignoreCase = true)) {
         parseColorOrNull(themeColorHex)
     } else {
         null
@@ -214,12 +317,18 @@ private fun TemplateLayer.resolveTextColor(
     return themedColor ?: parseColor(textStyle.color, Color.rgb(17, 24, 39))
 }
 
-private fun String.toTypeface(): Typeface =
-    when (lowercase()) {
-        "bold" -> Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        "semibold", "semi_bold", "medium" -> Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        else -> Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+private fun TemplateTextStyle.toTypeface(): Typeface {
+    val family = when (fontFamily.lowercase()) {
+        "serif" -> Typeface.SERIF
+        "mono", "monospace" -> Typeface.MONOSPACE
+        else -> Typeface.SANS_SERIF
     }
+    val style = when (fontWeight.lowercase()) {
+        "bold", "extrabold", "extra_bold", "black", "semibold", "semi_bold", "medium" -> Typeface.BOLD
+        else -> Typeface.NORMAL
+    }
+    return Typeface.create(family, style)
+}
 
 private fun String.toLayoutAlignment(): Layout.Alignment =
     when (lowercase()) {
@@ -243,5 +352,6 @@ private fun parseColor(value: String?, fallback: Int): Int =
 
 private fun parseColorOrNull(value: String?): Int? =
     runCatching {
-        if (value.isNullOrBlank()) null else Color.parseColor(value)
+        if (value.isNullOrBlank() || value.equals("themed", ignoreCase = true)) null
+        else Color.parseColor(value)
     }.getOrNull()

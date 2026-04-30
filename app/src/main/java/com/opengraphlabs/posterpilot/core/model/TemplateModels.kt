@@ -30,7 +30,9 @@ data class TemplateLayer(
     val width: Int,
     val height: Int,
     val zIndex: Int,
-    val textStyle: TemplateTextStyle?
+    val textStyle: TemplateTextStyle? = null,
+    val shapeStyle: TemplateShapeStyle? = null,
+    val pillBackground: TemplatePillBackground? = null
 )
 
 enum class LayerType {
@@ -58,5 +60,23 @@ data class TemplateTextStyle(
     val fontWeight: String,
     val color: String,
     val align: String,
-    val maxLines: Int
+    val maxLines: Int,
+    val letterSpacing: Float = 0f,
+    val fontFamily: String = "sans"
+)
+
+data class TemplateShapeStyle(
+    val fillType: String = "solid",
+    val fillColors: List<String> = emptyList(),
+    val cornerRadius: Int = 0,
+    val strokeColor: String? = null,
+    val strokeWidth: Int = 0
+)
+
+data class TemplatePillBackground(
+    val fillType: String = "solid",
+    val fillColors: List<String> = emptyList(),
+    val cornerRadius: Int = 0,
+    val paddingX: Int = 0,
+    val paddingY: Int = 0
 )

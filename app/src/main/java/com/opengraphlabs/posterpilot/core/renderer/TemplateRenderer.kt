@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,6 +34,8 @@ import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.model.TemplateLayer
+import com.opengraphlabs.posterpilot.core.model.TemplatePillBackground
+import com.opengraphlabs.posterpilot.core.model.TemplateShapeStyle
 import com.opengraphlabs.posterpilot.core.model.TemplateTextStyle
 
 private const val CanvasWidth = 1080f
@@ -65,7 +69,7 @@ fun TemplateRenderer(
         modifier = modifier
             .aspectRatio(aspectRatio)
             .background(template.background.backgroundBrush())
-            .border(1.dp, Color(0xFFE5E7EB))
+            .border(1.dp, Color(0x14000000))
     ) {
         val scaleX = maxWidth.value / CanvasWidth
         val scaleY = maxHeight.value / canvasHeight
@@ -181,8 +185,40 @@ private fun RenderLayerSafely(
             }
         }
 
-        LayerType.SHAPE -> Unit
+        LayerType.SHAPE -> RenderShapeLayer(
+            layer = layer,
+            scaleX = scaleX,
+            scaleY = scaleY,
+            themeColorHex = themeColorHex
+        )
     }
+}
+
+@Composable
+private fun RenderShapeLayer(
+    layer: TemplateLayer,
+    scaleX: Float,
+    scaleY: Float,
+    themeColorHex: String?
+) {
+    val style = layer.shapeStyle ?: return
+    val brush = style.brush(themeColorHex) ?: return
+    val cornerRadius = (style.cornerRadius.toFloat()).scaledDp(minOf(scaleX, scaleY))
+    val strokeColor = parseColorOrNull(style.strokeColor)
+    val baseModifier = layer.scaledModifier(scaleX, scaleY)
+        .clip(RoundedCornerShape(cornerRadius))
+        .background(brush)
+
+    val finalModifier = if (strokeColor != null && style.strokeWidth > 0) {
+        baseModifier.border(
+            width = style.strokeWidth.toFloat().scaledDp(minOf(scaleX, scaleY)),
+            color = strokeColor,
+            shape = RoundedCornerShape(cornerRadius)
+        )
+    } else {
+        baseModifier
+    }
+    Box(modifier = finalModifier)
 }
 
 @Composable
@@ -200,13 +236,41 @@ private fun RenderTextLayer(
 
     val textStyle = layer.textStyle ?: return
 
+    layer.pillBackground?.let { pill ->
+        val brush = pill.brush(themeColorHex)
+        if (brush != null) {
+            val pillX = layer.x - pill.paddingX
+            val pillY = layer.y - pill.paddingY
+            val pillW = layer.width + pill.paddingX * 2
+            val pillH = layer.height + pill.paddingY * 2
+            val cornerRadius = pill.cornerRadius.toFloat().scaledDp(minOf(scaleX, scaleY))
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = pillX.toFloat().scaledDp(scaleX),
+                        y = pillY.toFloat().scaledDp(scaleY)
+                    )
+                    .size(
+                        width = pillW.toFloat().scaledDp(scaleX),
+                        height = pillH.toFloat().scaledDp(scaleY)
+                    )
+                    .zIndex(layer.zIndex.toFloat() - 0.5f)
+                    .clip(RoundedCornerShape(cornerRadius))
+                    .background(brush)
+            )
+        }
+    }
+
     Text(
         modifier = layer.scaledModifier(scaleX, scaleY),
         text = text,
         color = layer.resolveTextColor(textStyle, themeColorHex),
         fontSize = (textStyle.fontSize.coerceAtLeast(1) * fontScale).sp,
         fontWeight = textStyle.fontWeight.toComposeFontWeight(),
+        fontFamily = textStyle.fontFamily.toComposeFontFamily(),
         textAlign = textStyle.align.toComposeTextAlign(),
+        letterSpacing = (textStyle.letterSpacing * fontScale).sp,
+        lineHeight = (textStyle.fontSize.coerceAtLeast(1) * fontScale * 1.05f).sp,
         maxLines = textStyle.maxLines.coerceAtLeast(1),
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.bodyMedium
@@ -222,7 +286,7 @@ private fun LogoPlaceholder(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(parseColor(themeColorHex, Color(0xFFF7B733))),
+            .background(parseColor(themeColorHex, Color(0xFFE8A33D))),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -270,6 +334,41 @@ private fun com.opengraphlabs.posterpilot.core.model.TemplateBackground.backgrou
     }
 }
 
+private fun TemplateShapeStyle.brush(themeColorHex: String?): Brush? = makeBrush(
+    fillType = fillType,
+    fillColors = fillColors,
+    themeColorHex = themeColorHex
+)
+
+private fun TemplatePillBackground.brush(themeColorHex: String?): Brush? = makeBrush(
+    fillType = fillType,
+    fillColors = fillColors,
+    themeColorHex = themeColorHex
+)
+
+private fun makeBrush(
+    fillType: String,
+    fillColors: List<String>,
+    themeColorHex: String?
+): Brush? {
+    val resolved = when (fillType.lowercase()) {
+        "themed" -> {
+            val themed = parseColorOrNull(themeColorHex)
+                ?: parseColorOrNull(fillColors.firstOrNull())
+                ?: return null
+            listOf(themed, themed)
+        }
+        "gradient" -> fillColors.mapNotNull { parseColorOrNull(it) }
+            .takeIf { it.size >= 2 }
+            ?: return null
+        else -> {
+            val solid = parseColorOrNull(fillColors.firstOrNull()) ?: return null
+            listOf(solid, solid)
+        }
+    }
+    return Brush.linearGradient(resolved)
+}
+
 private fun PlaceholderBinding?.resolveText(
     businessProfile: BusinessProfile?,
     copy: TemplateCopy
@@ -294,7 +393,13 @@ private fun TemplateLayer.resolveTextColor(
     textStyle: TemplateTextStyle,
     themeColorHex: String?
 ): Color {
-    val themedColor = if (binding == PlaceholderBinding.CTA) {
+    val themedColor = if (
+        binding == PlaceholderBinding.CTA &&
+        pillBackground == null &&
+        textStyle.color.equals("themed", ignoreCase = true).not()
+    ) {
+        parseColorOrNull(themeColorHex)
+    } else if (textStyle.color.equals("themed", ignoreCase = true)) {
         parseColorOrNull(themeColorHex)
     } else {
         null
@@ -317,10 +422,19 @@ private fun BusinessProfile?.initials(): String {
 private fun String.toComposeFontWeight(): FontWeight =
     when (lowercase()) {
         "bold" -> FontWeight.Bold
+        "extrabold", "extra_bold" -> FontWeight.ExtraBold
+        "black" -> FontWeight.Black
         "semibold", "semi_bold" -> FontWeight.SemiBold
         "medium" -> FontWeight.Medium
         "light" -> FontWeight.Light
         else -> FontWeight.Normal
+    }
+
+private fun String.toComposeFontFamily(): FontFamily =
+    when (lowercase()) {
+        "serif" -> FontFamily.Serif
+        "mono", "monospace" -> FontFamily.Monospace
+        else -> FontFamily.SansSerif
     }
 
 private fun String.toComposeTextAlign(): TextAlign =
@@ -335,7 +449,7 @@ private fun parseColor(value: String?, fallback: Color): Color =
 
 private fun parseColorOrNull(value: String?): Color? =
     runCatching {
-        if (value.isNullOrBlank()) {
+        if (value.isNullOrBlank() || value.equals("themed", ignoreCase = true)) {
             null
         } else {
             Color(android.graphics.Color.parseColor(value))
