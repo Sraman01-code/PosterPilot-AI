@@ -1,18 +1,20 @@
 package com.opengraphlabs.posterpilot.feature.templates
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
-import com.opengraphlabs.posterpilot.core.renderer.TemplateRenderer
-import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.renderer.TemplateRendererPreviewFrame
 import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 
 @Composable
@@ -48,35 +49,61 @@ fun TemplatePreviewScreen(
         isLoading = false
     }
 
-    PosterPilotScaffold {
-        Column(
-            modifier = Modifier.fillMaxSize(),
+    Scaffold(
+        bottomBar = {
+            val loadedTemplate = template
+            if (!isLoading && loadedTemplate != null) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    onClick = { onEdit(loadedTemplate.id) }
+                ) {
+                    Text(text = "Edit poster")
+                }
+            }
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(28.dp))
-            Button(onClick = onBack) {
-                Text(text = "Back")
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(onClick = onBack) {
+                    Text(text = "Back")
+                }
             }
 
             if (isLoading) {
-                Text(
-                    text = "Loading template...",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                item {
+                    Text(
+                        text = "Loading template...",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             } else {
                 val loadedTemplate = template
                 if (loadedTemplate == null) {
-                    Text(
-                        text = "Template not found",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                    item {
+                        Text(
+                            text = "Template not found",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 } else {
-                    TemplatePreviewContent(
-                        template = loadedTemplate,
-                        businessProfile = businessProfile,
-                        onEdit = onEdit
-                    )
+                    item {
+                        TemplatePreviewContent(
+                            template = loadedTemplate,
+                            businessProfile = businessProfile
+                        )
+                    }
                 }
             }
         }
@@ -84,10 +111,9 @@ fun TemplatePreviewScreen(
 }
 
 @Composable
-private fun ColumnScope.TemplatePreviewContent(
+private fun TemplatePreviewContent(
     template: PosterTemplate,
-    businessProfile: BusinessProfile?,
-    onEdit: (String) -> Unit
+    businessProfile: BusinessProfile?
 ) {
     Text(
         text = template.title,
@@ -104,33 +130,22 @@ private fun ColumnScope.TemplatePreviewContent(
     )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = template.previewMaxHeight()),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        TemplateRenderer(
+        TemplateRendererPreviewFrame(
             template = template,
             businessProfile = businessProfile,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
+            maxPreviewHeight = template.previewMaxHeight(),
+            modifier = Modifier.padding(12.dp)
         )
-    }
-
-    Spacer(modifier = Modifier.weight(1f))
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { onEdit(template.id) }
-    ) {
-        Text(text = "Edit poster")
     }
 }
 
 private fun PosterTemplate.previewMaxHeight() =
     when (format) {
-        PosterFormat.SQUARE_1_1 -> 300.dp
-        PosterFormat.STORY_9_16 -> 340.dp
+        PosterFormat.SQUARE_1_1 -> 360.dp
+        PosterFormat.STORY_9_16 -> 420.dp
     }

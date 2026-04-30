@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -99,6 +101,41 @@ fun TemplateRenderer(
                     .zIndex(10f)
             )
         }
+    }
+}
+
+@Composable
+fun TemplateRendererPreviewFrame(
+    template: PosterTemplate,
+    businessProfile: BusinessProfile?,
+    maxPreviewHeight: Dp,
+    modifier: Modifier = Modifier,
+    draft: PosterDraft? = null,
+    copy: TemplateCopy = TemplateCopy()
+) {
+    val canvasHeight = template.format.canvasHeight()
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(maxPreviewHeight),
+        contentAlignment = Alignment.Center
+    ) {
+        val scale = minOf(
+            maxWidth.value / CanvasWidth,
+            maxHeight.value / canvasHeight
+        ).coerceAtLeast(0f)
+
+        TemplateRenderer(
+            template = template,
+            businessProfile = businessProfile,
+            draft = draft,
+            copy = copy,
+            modifier = Modifier.size(
+                width = (CanvasWidth * scale).dp,
+                height = (canvasHeight * scale).dp
+            )
+        )
     }
 }
 

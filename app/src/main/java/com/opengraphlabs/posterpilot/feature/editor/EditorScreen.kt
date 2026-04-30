@@ -10,17 +10,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,8 +41,8 @@ import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
-import com.opengraphlabs.posterpilot.core.renderer.TemplateRenderer
-import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.renderer.TemplateRendererPreviewFrame
+import com.opengraphlabs.posterpilot.core.ui.ColorSwatch
 import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,12 +83,17 @@ fun EditorScreen(
         isLoading = false
     }
 
-    PosterPilotScaffold {
+    Scaffold { paddingValues ->
         LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp)
+                .imePadding()
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 OutlinedButton(onClick = onBack) {
                     Text(text = "Back")
                 }
@@ -180,13 +186,13 @@ private fun EditorContent(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        TemplateRenderer(
+        TemplateRendererPreviewFrame(
             template = template,
             businessProfile = businessProfile,
             draft = draft,
+            maxPreviewHeight = template.editorPreviewMaxHeight(),
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = template.editorPreviewMaxHeight())
                 .padding(12.dp)
         )
     }
@@ -224,13 +230,13 @@ private fun EditorContent(
     )
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         colorPresets.forEach { colorHex ->
-            FilterChip(
+            ColorSwatch(
+                colorHex = colorHex,
                 selected = draft.themeColorHex == colorHex,
-                onClick = { onDraftChanged(draft.copy(themeColorHex = colorHex)) },
-                label = { Text(text = colorHex) }
+                onClick = { onDraftChanged(draft.copy(themeColorHex = colorHex)) }
             )
         }
     }
