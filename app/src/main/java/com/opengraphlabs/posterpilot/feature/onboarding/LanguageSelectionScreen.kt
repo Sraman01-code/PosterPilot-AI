@@ -17,14 +17,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.opengraphlabs.posterpilot.core.model.AppLanguage
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 
 @Composable
 fun LanguageSelectionScreen(
     selectedLanguage: AppLanguage?,
     onLanguageSelected: (AppLanguage) -> Unit,
-    onContinue: () -> Unit
+    onContinue: () -> Unit,
+    onBack: () -> Unit
 ) {
-    PosterPilotScaffold {
+    PosterPilotScaffold(
+        topBar = { PosterTopBar(eyebrow = "Step 1 of 2", title = "Language", onBack = onBack) }
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center

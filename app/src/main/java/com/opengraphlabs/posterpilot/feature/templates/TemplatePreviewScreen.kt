@@ -13,9 +13,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +72,14 @@ fun TemplatePreviewScreen(
     }
 
     Scaffold(
+        topBar = {
+            PosterTopBar(
+                eyebrow = template?.category?.displayName ?: "Template",
+                title = template?.title ?: "Preview",
+                onBack = onBack
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             val loadedTemplate = template
             if (!isLoading && loadedTemplate != null) {
@@ -79,7 +87,7 @@ fun TemplatePreviewScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
                     onClick = { onEdit(loadedTemplate.id) }
                 ) {
                     Text(text = "Edit poster")
@@ -91,17 +99,10 @@ fun TemplatePreviewScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 24.dp),
             contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(onClick = onBack) {
-                    Text(text = "Back")
-                }
-            }
-
             if (isLoading) {
                 item {
                     Text(

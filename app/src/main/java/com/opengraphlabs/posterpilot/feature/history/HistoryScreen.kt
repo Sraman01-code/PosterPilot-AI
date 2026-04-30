@@ -38,6 +38,7 @@ import com.opengraphlabs.posterpilot.core.analytics.AnalyticsEvents
 import com.opengraphlabs.posterpilot.core.analytics.AnalyticsTracker
 import com.opengraphlabs.posterpilot.core.share.sharePoster
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 import com.opengraphlabs.posterpilot.data.local.history.ExportedPosterEntity
 import com.opengraphlabs.posterpilot.data.local.history.HistoryRepository
 import java.io.File
@@ -59,22 +60,21 @@ fun HistoryScreen(
         analyticsTracker.track(AnalyticsEvents.HistoryOpened)
     }
 
-    PosterPilotScaffold {
+    PosterPilotScaffold(
+        topBar = {
+            PosterTopBar(
+                eyebrow = "Archive",
+                title = "Export history",
+                onBack = onBack
+            )
+        }
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(28.dp))
-                OutlinedButton(onClick = onBack) {
-                    Text(text = "Back")
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Export history",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
             shareError?.let { message ->

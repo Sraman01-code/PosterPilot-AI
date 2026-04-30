@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -115,22 +116,24 @@ fun EditorScreen(
         isLoading = false
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            PosterTopBar(
+                eyebrow = template?.category?.displayName ?: "Editor",
+                title = template?.title ?: "Edit poster",
+                onBack = onBack
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
                 .imePadding()
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(onClick = onBack) {
-                    Text(text = "Back")
-                }
-            }
-
             if (isLoading) {
                 item {
                     Text(

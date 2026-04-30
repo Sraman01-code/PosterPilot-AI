@@ -32,12 +32,14 @@ import com.opengraphlabs.posterpilot.core.model.BusinessCategory
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.ui.ColorSwatch
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessSetupScreen(
     selectedLanguage: AppLanguage?,
-    onProfileSaved: (BusinessProfile) -> Unit
+    onProfileSaved: (BusinessProfile) -> Unit,
+    onBack: () -> Unit
 ) {
     var businessName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -52,17 +54,14 @@ fun BusinessSetupScreen(
         selectedCategory != null &&
         selectedBrandColorHex != null
 
-    PosterPilotScaffold {
+    PosterPilotScaffold(
+        topBar = { PosterTopBar(eyebrow = "Step 2 of 2", title = "Your business", onBack = onBack) }
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Business setup",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = businessName,

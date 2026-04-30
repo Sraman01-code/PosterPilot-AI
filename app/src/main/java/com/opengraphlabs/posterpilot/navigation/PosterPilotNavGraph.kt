@@ -60,7 +60,8 @@ fun PosterPilotNavGraph(
                 onLanguageSelected = onLanguageSelected,
                 onContinue = {
                     navController.navigate(PosterPilotRoute.BusinessSetup.route)
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -72,7 +73,8 @@ fun PosterPilotNavGraph(
                     navController.navigate(PosterPilotRoute.Home.route) {
                         popUpTo(PosterPilotRoute.Welcome.route) { inclusive = true }
                     }
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 

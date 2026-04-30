@@ -28,6 +28,7 @@ import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterCategory
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
+import com.opengraphlabs.posterpilot.core.ui.PosterTopBar
 import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 
 @Composable
@@ -57,17 +58,18 @@ fun HomeScreen(
         isLoading = false
     }
 
-    PosterPilotScaffold {
+    PosterPilotScaffold(
+        topBar = {
+            PosterTopBar(
+                eyebrow = "PosterPilot AI",
+                title = businessProfile?.businessName ?: "Studio"
+            )
+        }
+    ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(28.dp))
-                Text(
-                    text = "PosterPilot AI",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = businessProfile?.let {
