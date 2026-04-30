@@ -86,6 +86,7 @@ fun PosterPilotNavGraph(
                 templateId = backStackEntry.arguments
                     ?.getString(PosterPilotRoute.TemplatePreview.TemplateIdArg)
                     .orEmpty(),
+                businessProfile = businessProfile,
                 onBack = { navController.popBackStack() }
             )
         }
