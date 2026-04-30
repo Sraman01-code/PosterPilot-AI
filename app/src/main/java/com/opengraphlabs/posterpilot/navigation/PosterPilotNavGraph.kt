@@ -8,6 +8,7 @@ import com.opengraphlabs.posterpilot.core.model.AppLanguage
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.data.local.BusinessProfileState
 import com.opengraphlabs.posterpilot.feature.editor.EditorScreen
+import com.opengraphlabs.posterpilot.feature.history.HistoryScreen
 import com.opengraphlabs.posterpilot.feature.home.HomeScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.BusinessSetupScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.LanguageSelectionScreen
@@ -78,7 +79,16 @@ fun PosterPilotNavGraph(
                 businessProfile = businessProfile,
                 onTemplateSelected = { templateId ->
                     navController.navigate(PosterPilotRoute.TemplatePreview.createRoute(templateId))
+                },
+                onHistorySelected = {
+                    navController.navigate(PosterPilotRoute.History.route)
                 }
+            )
+        }
+
+        composable(PosterPilotRoute.History.route) {
+            HistoryScreen(
+                onBack = { navController.popBackStack() }
             )
         }
 

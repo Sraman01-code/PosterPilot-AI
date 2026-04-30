@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +31,8 @@ import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 @Composable
 fun HomeScreen(
     businessProfile: BusinessProfile?,
-    onTemplateSelected: (String) -> Unit
+    onTemplateSelected: (String) -> Unit,
+    onHistorySelected: () -> Unit
 ) {
     val context = LocalContext.current
     val repository = remember { TemplateRepository(context.applicationContext) }
@@ -60,6 +62,13 @@ fun HomeScreen(
                     } ?: "Templates",
                     style = MaterialTheme.typography.bodyLarge
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onHistorySelected
+                ) {
+                    Text(text = "View export history")
+                }
             }
 
             if (isLoading) {
