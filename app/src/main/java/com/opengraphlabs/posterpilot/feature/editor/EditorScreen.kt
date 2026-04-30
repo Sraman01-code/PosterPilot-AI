@@ -41,6 +41,8 @@ import com.opengraphlabs.posterpilot.core.renderer.TemplateRendererPreviewFrame
 import com.opengraphlabs.posterpilot.core.share.sharePoster
 import com.opengraphlabs.posterpilot.core.ui.ColorSwatch
 import com.opengraphlabs.posterpilot.data.local.history.HistoryRepository
+import com.opengraphlabs.posterpilot.data.remote.ai.AiCopyRepository
+import com.opengraphlabs.posterpilot.data.remote.ai.AiCopySource
 import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,6 +56,13 @@ private sealed interface ExportState {
     data class Error(val message: String) : ExportState
 }
 
+private sealed interface AiCopyState {
+    data object Idle : AiCopyState
+    data object Loading : AiCopyState
+    data class Success(val message: String) : AiCopyState
+    data class Error(val message: String) : AiCopyState
+}
+
 @Composable
 fun EditorScreen(
     templateId: String,
@@ -65,9 +74,11 @@ fun EditorScreen(
     val repository = remember { TemplateRepository(context.applicationContext) }
     val exporter = remember { PosterBitmapExporter(context.applicationContext) }
     val historyRepository = remember { HistoryRepository(context.applicationContext) }
+    val aiCopyRepository = remember { AiCopyRepository() }
     var template by remember { mutableStateOf<PosterTemplate?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var exportState by remember { mutableStateOf<ExportState>(ExportState.Idle) }
+    var aiCopyState by remember { mutableStateOf<AiCopyState>(AiCopyState.Idle) }
     var draft by remember(templateId, businessProfile?.brandColorHex) {
         mutableStateOf(
             PosterDraft(
@@ -122,9 +133,40 @@ fun EditorScreen(
                             businessProfile = businessProfile,
                             draft = draft,
                             exportState = exportState,
+                            aiCopyState = aiCopyState,
                             onDraftChanged = {
                                 draft = it
                                 exportState = ExportState.Idle
+                                aiCopyState = AiCopyState.Idle
+                            },
+                            onGenerateAiCopy = {
+                                aiCopyState = AiCopyState.Loading
+                                coroutineScope.launch {
+                                    val result = runCatching {
+                                        aiCopyRepository.generateCopy(
+                                            template = loadedTemplate,
+                                            businessProfile = businessProfile
+                                        )
+                                    }
+
+                                    result
+                                        .onSuccess { aiResult ->
+                                            draft = draft.copy(
+                                                headline = aiResult.copy.headline,
+                                                caption = aiResult.copy.caption,
+                                                cta = aiResult.copy.cta
+                                            )
+                                            aiCopyState = when (aiResult.source) {
+                                                AiCopySource.Backend -> AiCopyState.Success("AI copy applied.")
+                                                AiCopySource.Mock -> AiCopyState.Success("Sample copy applied.")
+                                            }
+                                        }
+                                        .onFailure { throwable ->
+                                            aiCopyState = AiCopyState.Error(
+                                                throwable.message ?: "AI copy failed. You can keep editing manually."
+                                            )
+                                        }
+                                }
                             },
                             onExport = {
                                 exportState = ExportState.Exporting
@@ -167,7 +209,9 @@ private fun EditorContent(
     businessProfile: BusinessProfile?,
     draft: PosterDraft,
     exportState: ExportState,
+    aiCopyState: AiCopyState,
     onDraftChanged: (PosterDraft) -> Unit,
+    onGenerateAiCopy: () -> Unit,
     onExport: () -> Unit,
     onShare: (File) -> Unit,
     onCreateAnother: () -> Unit
@@ -199,6 +243,37 @@ private fun EditorContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        enabled = aiCopyState !is AiCopyState.Loading,
+        onClick = onGenerateAiCopy
+    ) {
+        Text(
+            text = if (aiCopyState is AiCopyState.Loading) {
+                "Generating AI copy..."
+            } else {
+                "Generate AI Copy"
+            }
+        )
+    }
+    when (aiCopyState) {
+        AiCopyState.Idle -> Unit
+        AiCopyState.Loading -> Text(
+            text = "Requesting headline, caption, and CTA...",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        is AiCopyState.Success -> Text(
+            text = aiCopyState.message,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        is AiCopyState.Error -> Text(
+            text = aiCopyState.message,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 
