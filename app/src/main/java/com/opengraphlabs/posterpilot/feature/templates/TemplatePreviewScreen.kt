@@ -2,9 +2,12 @@ package com.opengraphlabs.posterpilot.feature.templates
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -22,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
+import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.renderer.TemplateRenderer
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
@@ -46,6 +50,7 @@ fun TemplatePreviewScreen(
 
     PosterPilotScaffold {
         Column(
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(28.dp))
@@ -79,7 +84,7 @@ fun TemplatePreviewScreen(
 }
 
 @Composable
-private fun TemplatePreviewContent(
+private fun ColumnScope.TemplatePreviewContent(
     template: PosterTemplate,
     businessProfile: BusinessProfile?,
     onEdit: (String) -> Unit
@@ -99,7 +104,9 @@ private fun TemplatePreviewContent(
     )
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = template.previewMaxHeight()),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -113,6 +120,7 @@ private fun TemplatePreviewContent(
         )
     }
 
+    Spacer(modifier = Modifier.weight(1f))
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onEdit(template.id) }
@@ -120,3 +128,9 @@ private fun TemplatePreviewContent(
         Text(text = "Edit poster")
     }
 }
+
+private fun PosterTemplate.previewMaxHeight() =
+    when (format) {
+        PosterFormat.SQUARE_1_1 -> 300.dp
+        PosterFormat.STORY_9_16 -> 340.dp
+    }

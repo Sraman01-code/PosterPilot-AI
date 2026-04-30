@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import androidx.core.content.FileProvider
 import com.opengraphlabs.posterpilot.core.export.PosterBitmapExporter
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
+import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.renderer.TemplateRenderer
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
@@ -184,6 +186,7 @@ private fun EditorContent(
             draft = draft,
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = template.editorPreviewMaxHeight())
                 .padding(12.dp)
         )
     }
@@ -335,6 +338,12 @@ private fun LogoSlider(
 
 private fun Float.formatForLabel(): String =
     "%.1f".format(this)
+
+private fun PosterTemplate.editorPreviewMaxHeight() =
+    when (format) {
+        PosterFormat.SQUARE_1_1 -> 280.dp
+        PosterFormat.STORY_9_16 -> 300.dp
+    }
 
 private fun shareExportedPoster(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
