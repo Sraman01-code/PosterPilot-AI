@@ -6,4 +6,9 @@ sealed class PosterPilotRoute(val route: String) {
     data object LanguageSelection : PosterPilotRoute("language_selection")
     data object BusinessSetup : PosterPilotRoute("business_setup")
     data object Home : PosterPilotRoute("home")
+    data object TemplatePreview : PosterPilotRoute("template_preview/{templateId}") {
+        const val TemplateIdArg = "templateId"
+
+        fun createRoute(templateId: String): String = "template_preview/$templateId"
+    }
 }

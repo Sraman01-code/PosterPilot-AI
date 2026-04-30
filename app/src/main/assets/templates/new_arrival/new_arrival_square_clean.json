@@ -1,0 +1,63 @@
+{
+  "id": "new_arrival_square_clean",
+  "title": "New Arrival Clean Square",
+  "category": "NEW_ARRIVAL",
+  "format": "SQUARE_1_1",
+  "background": {
+    "type": "solid",
+    "colors": ["#F8FAFC"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 72,
+      "y": 160,
+      "width": 760,
+      "height": 160,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 54,
+        "fontWeight": "Bold",
+        "color": "#0F172A",
+        "align": "Start",
+        "maxLines": 2
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 72,
+      "y": 350,
+      "width": 720,
+      "height": 120,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 30,
+        "fontWeight": "Regular",
+        "color": "#475569",
+        "align": "Start",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 72,
+      "y": 900,
+      "width": 560,
+      "height": 56,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#0F172A",
+        "align": "Start",
+        "maxLines": 1
+      }
+    }
+  ]
+}

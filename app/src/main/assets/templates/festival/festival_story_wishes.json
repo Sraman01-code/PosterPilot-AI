@@ -1,0 +1,63 @@
+{
+  "id": "festival_story_wishes",
+  "title": "Festival Wishes Story",
+  "category": "FESTIVAL",
+  "format": "STORY_9_16",
+  "background": {
+    "type": "solid",
+    "colors": ["#FEF9C3"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 90,
+      "y": 320,
+      "width": 760,
+      "height": 260,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 62,
+        "fontWeight": "Bold",
+        "color": "#854D0E",
+        "align": "Center",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "cta",
+      "type": "TEXT",
+      "binding": "CTA",
+      "x": 160,
+      "y": 1320,
+      "width": 620,
+      "height": 84,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#FFFFFF",
+        "align": "Center",
+        "maxLines": 1
+      }
+    },
+    {
+      "id": "phone",
+      "type": "TEXT",
+      "binding": "PHONE",
+      "x": 90,
+      "y": 1680,
+      "width": 760,
+      "height": 44,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 28,
+        "fontWeight": "Regular",
+        "color": "#111827",
+        "align": "Center",
+        "maxLines": 1
+      }
+    }
+  ]
+}

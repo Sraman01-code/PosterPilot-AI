@@ -1,0 +1,63 @@
+{
+  "id": "thank_you_square_warm",
+  "title": "Thank You Warm Square",
+  "category": "THANK_YOU",
+  "format": "SQUARE_1_1",
+  "background": {
+    "type": "gradient",
+    "colors": ["#FDF2F8", "#F9A8D4"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 88,
+      "y": 190,
+      "width": 740,
+      "height": 170,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 56,
+        "fontWeight": "Bold",
+        "color": "#831843",
+        "align": "Center",
+        "maxLines": 2
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 96,
+      "y": 400,
+      "width": 720,
+      "height": 140,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 30,
+        "fontWeight": "Regular",
+        "color": "#9D174D",
+        "align": "Center",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 88,
+      "y": 880,
+      "width": 740,
+      "height": 60,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#831843",
+        "align": "Center",
+        "maxLines": 1
+      }
+    }
+  ]
+}

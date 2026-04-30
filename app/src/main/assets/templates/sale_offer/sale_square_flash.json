@@ -1,0 +1,63 @@
+{
+  "id": "sale_square_flash",
+  "title": "Flash Sale Square",
+  "category": "SALE_OFFER",
+  "format": "SQUARE_1_1",
+  "background": {
+    "type": "gradient",
+    "colors": ["#EFF6FF", "#2563EB"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 64,
+      "y": 160,
+      "width": 780,
+      "height": 170,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 58,
+        "fontWeight": "Bold",
+        "color": "#111827",
+        "align": "Start",
+        "maxLines": 2
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 64,
+      "y": 360,
+      "width": 700,
+      "height": 120,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 30,
+        "fontWeight": "Regular",
+        "color": "#1F2937",
+        "align": "Start",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "cta",
+      "type": "TEXT",
+      "binding": "CTA",
+      "x": 64,
+      "y": 760,
+      "width": 420,
+      "height": 72,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 30,
+        "fontWeight": "SemiBold",
+        "color": "#FFFFFF",
+        "align": "Center",
+        "maxLines": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "sale_story_flash",
+  "title": "Flash Sale Story",
+  "category": "SALE_OFFER",
+  "format": "STORY_9_16",
+  "background": {
+    "type": "gradient",
+    "colors": ["#F0FDF4", "#16A34A"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 72,
+      "y": 300,
+      "width": 780,
+      "height": 240,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 66,
+        "fontWeight": "Bold",
+        "color": "#052E16",
+        "align": "Start",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 72,
+      "y": 590,
+      "width": 760,
+      "height": 160,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "Regular",
+        "color": "#14532D",
+        "align": "Start",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 72,
+      "y": 1640,
+      "width": 760,
+      "height": 60,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#052E16",
+        "align": "Start",
+        "maxLines": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "festival_square_blessings",
+  "title": "Festival Blessings Square",
+  "category": "FESTIVAL",
+  "format": "SQUARE_1_1",
+  "background": {
+    "type": "solid",
+    "colors": ["#FEF3C7"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 90,
+      "y": 170,
+      "width": 760,
+      "height": 180,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 54,
+        "fontWeight": "Bold",
+        "color": "#92400E",
+        "align": "Center",
+        "maxLines": 2
+      }
+    },
+    {
+      "id": "cta",
+      "type": "TEXT",
+      "binding": "CTA",
+      "x": 180,
+      "y": 750,
+      "width": 520,
+      "height": 70,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 32,
+        "fontWeight": "SemiBold",
+        "color": "#FFFFFF",
+        "align": "Center",
+        "maxLines": 1
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 90,
+      "y": 900,
+      "width": 760,
+      "height": 60,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#1F2937",
+        "align": "Center",
+        "maxLines": 1
+      }
+    }
+  ]
+}

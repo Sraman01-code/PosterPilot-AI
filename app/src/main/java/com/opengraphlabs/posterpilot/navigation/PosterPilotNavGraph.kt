@@ -11,6 +11,7 @@ import com.opengraphlabs.posterpilot.feature.home.HomeScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.BusinessSetupScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.LanguageSelectionScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.WelcomeScreen
+import com.opengraphlabs.posterpilot.feature.templates.TemplatePreviewScreen
 
 @Composable
 fun PosterPilotNavGraph(
@@ -72,7 +73,21 @@ fun PosterPilotNavGraph(
         }
 
         composable(PosterPilotRoute.Home.route) {
-            HomeScreen(businessProfile = businessProfile)
+            HomeScreen(
+                businessProfile = businessProfile,
+                onTemplateSelected = { templateId ->
+                    navController.navigate(PosterPilotRoute.TemplatePreview.createRoute(templateId))
+                }
+            )
+        }
+
+        composable(PosterPilotRoute.TemplatePreview.route) { backStackEntry ->
+            TemplatePreviewScreen(
+                templateId = backStackEntry.arguments
+                    ?.getString(PosterPilotRoute.TemplatePreview.TemplateIdArg)
+                    .orEmpty(),
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

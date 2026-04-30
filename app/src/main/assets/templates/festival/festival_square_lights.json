@@ -1,0 +1,80 @@
+{
+  "id": "festival_square_lights",
+  "title": "Festival Lights Square",
+  "category": "FESTIVAL",
+  "format": "SQUARE_1_1",
+  "background": {
+    "type": "gradient",
+    "colors": ["#FFF7ED", "#FDBA74"]
+  },
+  "layers": [
+    {
+      "id": "headline",
+      "type": "TEXT",
+      "binding": "HEADLINE",
+      "x": 64,
+      "y": 140,
+      "width": 820,
+      "height": 180,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 56,
+        "fontWeight": "Bold",
+        "color": "#1F2937",
+        "align": "Start",
+        "maxLines": 2
+      }
+    },
+    {
+      "id": "caption",
+      "type": "TEXT",
+      "binding": "CAPTION",
+      "x": 64,
+      "y": 360,
+      "width": 760,
+      "height": 120,
+      "zIndex": 2,
+      "textStyle": {
+        "fontSize": 30,
+        "fontWeight": "Regular",
+        "color": "#374151",
+        "align": "Start",
+        "maxLines": 3
+      }
+    },
+    {
+      "id": "business_name",
+      "type": "TEXT",
+      "binding": "BUSINESS_NAME",
+      "x": 64,
+      "y": 900,
+      "width": 560,
+      "height": 56,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 34,
+        "fontWeight": "SemiBold",
+        "color": "#1F2937",
+        "align": "Start",
+        "maxLines": 1
+      }
+    },
+    {
+      "id": "phone",
+      "type": "TEXT",
+      "binding": "PHONE",
+      "x": 64,
+      "y": 970,
+      "width": 420,
+      "height": 40,
+      "zIndex": 3,
+      "textStyle": {
+        "fontSize": 24,
+        "fontWeight": "Regular",
+        "color": "#374151",
+        "align": "Start",
+        "maxLines": 1
+      }
+    }
+  ]
+}
