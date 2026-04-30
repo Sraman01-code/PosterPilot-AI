@@ -20,7 +20,7 @@ import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
 
 @Composable
 fun LanguageSelectionScreen(
-    selectedLanguage: AppLanguage,
+    selectedLanguage: AppLanguage?,
     onLanguageSelected: (AppLanguage) -> Unit,
     onContinue: () -> Unit
 ) {
@@ -47,6 +47,7 @@ fun LanguageSelectionScreen(
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
+                enabled = selectedLanguage != null,
                 onClick = onContinue
             ) {
                 Text(text = "Continue")

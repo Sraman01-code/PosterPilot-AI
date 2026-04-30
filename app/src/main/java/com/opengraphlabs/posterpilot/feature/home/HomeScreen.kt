@@ -35,7 +35,9 @@ fun HomeScreen(businessProfile: BusinessProfile?) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Poster ideas will appear here in Phase 2.",
+                text = businessProfile?.let {
+                    "Brand color: ${it.brandColorHex}"
+                } ?: "Complete onboarding to unlock poster ideas.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

@@ -2,6 +2,7 @@ package com.opengraphlabs.posterpilot.feature.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,15 +34,21 @@ import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessSetupScreen(
-    selectedLanguage: AppLanguage,
+    selectedLanguage: AppLanguage?,
     onProfileSaved: (BusinessProfile) -> Unit
 ) {
     var businessName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(BusinessCategory.RETAIL_SHOP) }
+    var selectedCategory by remember { mutableStateOf<BusinessCategory?>(null) }
+    var selectedBrandColorHex by remember { mutableStateOf<String?>(null) }
     var categoryExpanded by remember { mutableStateOf(false) }
 
-    val canContinue = businessName.isNotBlank() && phone.isNotBlank()
+    val brandColors = listOf("#F7B733", "#10B981", "#2563EB", "#DC2626")
+    val canContinue = selectedLanguage != null &&
+        businessName.isNotBlank() &&
+        phone.isNotBlank() &&
+        selectedCategory != null &&
+        selectedBrandColorHex != null
 
     PosterPilotScaffold {
         Column(
@@ -69,7 +77,7 @@ fun BusinessSetupScreen(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
-                    value = selectedCategory.displayName,
+                    value = selectedCategory?.displayName.orEmpty(),
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(text = "Business category") },
@@ -101,17 +109,37 @@ fun BusinessSetupScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Brand color",
+                style = MaterialTheme.typography.labelLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                brandColors.forEach { colorHex ->
+                    FilterChip(
+                        selected = selectedBrandColorHex == colorHex,
+                        onClick = { selectedBrandColorHex = colorHex },
+                        label = { Text(text = colorHex) }
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = canContinue,
-                onClick = {
+                onClick = onClick@{
+                    val category = selectedCategory ?: return@onClick
+                    val language = selectedLanguage ?: return@onClick
+                    val brandColorHex = selectedBrandColorHex ?: return@onClick
+
                     onProfileSaved(
                         BusinessProfile(
                             businessName = businessName.trim(),
-                            category = selectedCategory,
+                            category = category,
                             phone = phone.trim(),
-                            language = selectedLanguage
+                            language = language,
+                            brandColorHex = brandColorHex
                         )
                     )
                 }

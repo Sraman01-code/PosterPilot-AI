@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.opengraphlabs.posterpilot.core.model.AppLanguage
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
+import com.opengraphlabs.posterpilot.data.local.BusinessProfileState
 import com.opengraphlabs.posterpilot.feature.home.HomeScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.BusinessSetupScreen
 import com.opengraphlabs.posterpilot.feature.onboarding.LanguageSelectionScreen
@@ -14,7 +15,8 @@ import com.opengraphlabs.posterpilot.feature.onboarding.WelcomeScreen
 @Composable
 fun PosterPilotNavGraph(
     navController: NavHostController,
-    selectedLanguage: AppLanguage,
+    profileState: BusinessProfileState,
+    selectedLanguage: AppLanguage?,
     businessProfile: BusinessProfile?,
     onLanguageSelected: (AppLanguage) -> Unit,
     onBusinessProfileSaved: (BusinessProfile) -> Unit
@@ -25,7 +27,7 @@ fun PosterPilotNavGraph(
     ) {
         composable(PosterPilotRoute.Splash.route) {
             SplashRoute(
-                businessProfile = businessProfile,
+                profileState = profileState,
                 onProfileMissing = {
                     navController.navigate(PosterPilotRoute.Welcome.route) {
                         popUpTo(PosterPilotRoute.Splash.route) { inclusive = true }
