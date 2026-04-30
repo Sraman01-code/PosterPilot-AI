@@ -1,5 +1,8 @@
 package com.opengraphlabs.posterpilot.feature.editor
 
+import android.content.ClipData
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,17 +27,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import com.opengraphlabs.posterpilot.core.export.PosterBitmapExporter
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
 import com.opengraphlabs.posterpilot.core.renderer.TemplateRenderer
 import com.opengraphlabs.posterpilot.core.ui.PosterPilotScaffold
 import com.opengraphlabs.posterpilot.data.templates.TemplateRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+
+private sealed interface ExportState {
+    data object Idle : ExportState
+    data object Exporting : ExportState
+    data class Success(val file: File) : ExportState
+    data class Error(val message: String) : ExportState
+}
 
 @Composable
 fun EditorScreen(
@@ -43,9 +60,12 @@ fun EditorScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val repository = remember { TemplateRepository(context.applicationContext) }
+    val exporter = remember { PosterBitmapExporter(context.applicationContext) }
     var template by remember { mutableStateOf<PosterTemplate?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var exportState by remember { mutableStateOf<ExportState>(ExportState.Idle) }
     var draft by remember(templateId, businessProfile?.brandColorHex) {
         mutableStateOf(
             PosterDraft(
@@ -94,7 +114,32 @@ fun EditorScreen(
                             template = loadedTemplate,
                             businessProfile = businessProfile,
                             draft = draft,
-                            onDraftChanged = { draft = it }
+                            exportState = exportState,
+                            onDraftChanged = {
+                                draft = it
+                                exportState = ExportState.Idle
+                            },
+                            onExport = {
+                                exportState = ExportState.Exporting
+                                coroutineScope.launch {
+                                    exportState = runCatching {
+                                        val file = withContext(Dispatchers.IO) {
+                                            exporter.export(
+                                                template = loadedTemplate,
+                                                businessProfile = businessProfile,
+                                                draft = draft
+                                            )
+                                        }
+                                        ExportState.Success(file)
+                                    }.getOrElse { throwable ->
+                                        ExportState.Error(
+                                            throwable.message ?: "Export failed"
+                                        )
+                                    }
+                                }
+                            },
+                            onShare = { file -> shareExportedPoster(context, file) },
+                            onCreateAnother = onBack
                         )
                     }
                 }
@@ -108,7 +153,11 @@ private fun EditorContent(
     template: PosterTemplate,
     businessProfile: BusinessProfile?,
     draft: PosterDraft,
-    onDraftChanged: (PosterDraft) -> Unit
+    exportState: ExportState,
+    onDraftChanged: (PosterDraft) -> Unit,
+    onExport: () -> Unit,
+    onShare: (File) -> Unit,
+    onCreateAnother: () -> Unit
 ) {
     val colorPresets = listOf("#F7B733", "#10B981", "#2563EB", "#DC2626", "#7C3AED")
 
@@ -206,12 +255,62 @@ private fun EditorContent(
     Spacer(modifier = Modifier.height(16.dp))
     Button(
         modifier = Modifier.fillMaxWidth(),
-        enabled = false,
-        onClick = {}
+        enabled = exportState !is ExportState.Exporting,
+        onClick = onExport
     ) {
-        Text(text = "Export coming in Phase 6")
+        Text(
+            text = if (exportState is ExportState.Exporting) {
+                "Exporting..."
+            } else {
+                "Export PNG"
+            }
+        )
     }
+
+    when (exportState) {
+        ExportState.Idle -> Unit
+        ExportState.Exporting -> Text(
+            text = "Creating PNG...",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        is ExportState.Error -> Text(
+            text = exportState.message,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        is ExportState.Success -> ExportSuccessActions(
+            file = exportState.file,
+            onShare = onShare,
+            onCreateAnother = onCreateAnother
+        )
+    }
+
     Spacer(modifier = Modifier.height(28.dp))
+}
+
+@Composable
+private fun ExportSuccessActions(
+    file: File,
+    onShare: (File) -> Unit,
+    onCreateAnother: () -> Unit
+) {
+    Text(
+        text = "PNG exported successfully.",
+        style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.SemiBold
+    )
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onShare(file) }
+    ) {
+        Text(text = "Share")
+    }
+    OutlinedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onCreateAnother
+    ) {
+        Text(text = "Create another")
+    }
 }
 
 @Composable
@@ -236,3 +335,22 @@ private fun LogoSlider(
 
 private fun Float.formatForLabel(): String =
     "%.1f".format(this)
+
+private fun shareExportedPoster(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_TEXT, "Created with PosterPilot AI")
+        clipData = ClipData.newUri(context.contentResolver, "PosterPilot AI poster", uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(
+        Intent.createChooser(shareIntent, "Share poster")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
+}
