@@ -12,6 +12,7 @@ object AnalyticsEvents {
     const val AiCopyRequested = "ai_copy_requested"
     const val AiCopySuccess = "ai_copy_success"
     const val AiCopyFailed = "ai_copy_failed"
+    const val AiCopyReported = "ai_copy_reported"
     const val ExportStarted = "export_started"
     const val ExportSuccess = "export_success"
     const val ExportFailed = "export_failed"

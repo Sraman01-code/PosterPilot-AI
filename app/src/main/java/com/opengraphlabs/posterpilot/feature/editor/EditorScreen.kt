@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -108,6 +110,7 @@ fun EditorScreen(
     var loadError by remember { mutableStateOf<String?>(null) }
     var exportState by remember { mutableStateOf<ExportState>(ExportState.Idle) }
     var aiCopyState by remember { mutableStateOf<AiCopyState>(AiCopyState.Idle) }
+    var reportDialogOpen by remember { mutableStateOf(false) }
     var draft by remember(templateId, businessProfile?.brandColorHex) {
         mutableStateOf(
             PosterDraft(
@@ -230,6 +233,7 @@ fun EditorScreen(
                         exportState = ExportState.Idle
                         aiCopyState = AiCopyState.Idle
                     },
+                    onReportAiCopy = { reportDialogOpen = true },
                     onGenerateAiCopy = {
                         val loaded = template ?: return@EditorBody
                         analyticsTracker.track(
@@ -283,6 +287,30 @@ fun EditorScreen(
                 )
             }
         }
+
+        if (reportDialogOpen) {
+            ReportAiCopyDialog(
+                onDismiss = { reportDialogOpen = false },
+                onConfirm = { reason ->
+                    val loaded = template
+                    analyticsTracker.track(
+                        event = AnalyticsEvents.AiCopyReported,
+                        params = buildMap {
+                            put("reason", reason)
+                            loaded?.let {
+                                put("templateId", it.id)
+                                put("category", it.category.name)
+                            }
+                            put("headlineSnippet", draft.headline.take(80))
+                            put("captionSnippet", draft.caption.take(80))
+                            put("ctaSnippet", draft.cta.take(40))
+                        }
+                    )
+                    reportDialogOpen = false
+                    aiCopyState = AiCopyState.Success("Reported. Thanks for the flag.")
+                }
+            )
+        }
     }
 }
 
@@ -293,7 +321,8 @@ private fun EditorBody(
     draft: PosterDraft,
     aiCopyState: AiCopyState,
     onDraftChanged: (PosterDraft) -> Unit,
-    onGenerateAiCopy: () -> Unit
+    onGenerateAiCopy: () -> Unit,
+    onReportAiCopy: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         PreviewStage(template = template, businessProfile = businessProfile, draft = draft)
@@ -314,7 +343,8 @@ private fun EditorBody(
                 draft = draft,
                 aiCopyState = aiCopyState,
                 onDraftChanged = onDraftChanged,
-                onGenerateAiCopy = onGenerateAiCopy
+                onGenerateAiCopy = onGenerateAiCopy,
+                onReportAiCopy = onReportAiCopy
             )
             BrandSection(
                 draft = draft,
@@ -390,7 +420,8 @@ private fun CopySection(
     draft: PosterDraft,
     aiCopyState: AiCopyState,
     onDraftChanged: (PosterDraft) -> Unit,
-    onGenerateAiCopy: () -> Unit
+    onGenerateAiCopy: () -> Unit,
+    onReportAiCopy: () -> Unit
 ) {
     SectionHeader(label = "Copy", helper = aiHelperText(aiCopyState))
     Spacer(modifier = Modifier.height(14.dp))
@@ -416,6 +447,30 @@ private fun CopySection(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
+        }
+    }
+
+    if (aiCopyState is AiCopyState.Success) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "AI suggestions can miss the mark. Edit anything before exporting.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = onReportAiCopy) {
+                Text(
+                    text = "Report",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 
@@ -791,3 +846,85 @@ private fun exportSubtitle(state: ExportState): String =
         is ExportState.Error -> state.message
         is ExportState.Success -> "Poster ready"
     }
+
+private val ReportReasons = listOf(
+    "Inappropriate or unsafe",
+    "Inaccurate or misleading",
+    "Off-brand or off-tone",
+    "Other concern"
+)
+
+@Composable
+private fun ReportAiCopyDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var selected by remember { mutableStateOf(ReportReasons.first()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Report AI suggestion",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Tell us why this AI-generated copy was a problem. Reports help us tune the prompts and remove unsafe outputs.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                ReportReasons.forEach { reason ->
+                    val isSelected = selected == reason
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { selected = reason }
+                            .padding(vertical = 10.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .border(
+                                    width = if (isSelected) 6.dp else 1.5.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
+                                    shape = CircleShape
+                                )
+                        )
+                        Text(
+                            text = reason,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selected) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onBackground,
+                    contentColor = MaterialTheme.colorScheme.background
+                )
+            ) {
+                Text(text = "Submit report", fontWeight = FontWeight.SemiBold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        titleContentColor = MaterialTheme.colorScheme.onBackground,
+        textContentColor = MaterialTheme.colorScheme.onBackground
+    )
+}
