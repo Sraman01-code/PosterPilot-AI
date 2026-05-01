@@ -1,5 +1,6 @@
 .gradle/
 .idea/
+.claude/
 build/
 local.properties
 *.iml
