@@ -135,6 +135,70 @@ The current MVP does not include:
 
 Known layout and visual polish issues are documented in `docs/KnownLayoutIssues.md` and should be addressed after Phase 9, once the functional MVP is stable.
 
+## Release Readiness
+
+PosterPilot AI v0.1 is targeted at the **Google Play internal testing** track.
+For the full status report — what is in place, what is still missing before
+closed / production releases, and the Play Console answers to use — read
+`docs/ReleaseReadiness.md`.
+
+The supporting compliance documents:
+
+- `docs/PrivacyPolicy.md` — local-first privacy policy draft (must be
+  legal-reviewed and hosted at a public URL before submission).
+- `docs/DataSafety.md` — pre-filled Play Console *Data safety* form mapping.
+- `docs/AiGeneratedContentPolicy.md` — generative-AI safeguards and the
+  in-editor *Report* affordance behaviour.
+
+### Verification commands
+
+Run all five before each release upload:
+
+```powershell
+.\gradlew.bat clean
+.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:assembleRelease
+.\gradlew.bat :app:bundleRelease
+.\gradlew.bat :app:lintRelease
+```
+
+The release AAB is produced at:
+
+```text
+app/build/outputs/bundle/release/app-release.aab
+```
+
+### Release signing
+
+Signing material is **never** committed to the repository. The release
+`signingConfig` reads four values, in order of preference, from
+`gradle.properties` then environment variables:
+
+| Property / env var | Description |
+|---|---|
+| `POSTER_PILOT_KEYSTORE_PATH` | Absolute path to the upload keystore (`*.jks`). |
+| `POSTER_PILOT_KEYSTORE_PASSWORD` | Keystore password. |
+| `POSTER_PILOT_KEY_ALIAS` | Key alias inside the keystore. |
+| `POSTER_PILOT_KEY_PASSWORD` | Password for that key. |
+
+If any of the four is missing, the release AAB / APK is built **unsigned**;
+the build itself still succeeds so local development is not blocked. The full
+upload-keystore generation and Play upload flow is documented in
+`docs/ReleaseReadiness.md`.
+
+### Internal testing release checklist
+
+- [ ] Privacy policy hosted at a public URL and pasted into the Play listing.
+- [ ] Data Safety form completed using `docs/DataSafety.md`.
+- [ ] AI content policy disclosed in the listing's GenAI section.
+- [ ] Upload keystore configured locally (see above) before
+      `:app:bundleRelease`.
+- [ ] `versionCode` bumped in `app/build.gradle.kts` for each iteration.
+- [ ] `app-release.aab` uploaded via Play Console → *Internal testing* →
+      *Create new release*.
+- [ ] Release notes written for the internal testers.
+- [ ] Tester emails added to the closed list.
+
 ## Brand
 
 Product: PosterPilot AI  
