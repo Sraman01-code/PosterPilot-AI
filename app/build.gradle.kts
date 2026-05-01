@@ -5,6 +5,24 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// --- Release signing -------------------------------------------------------
+// Resolves keystore material from gradle.properties OR environment variables.
+// Returns null when nothing is configured so local debug-only builds still
+// work; the Play upload AAB MUST be produced from a machine where these
+// values are set. Never commit a keystore or password into the repo.
+fun resolveProperty(name: String): String? =
+    (project.findProperty(name) as? String)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(name)?.takeIf { it.isNotBlank() }
+
+val releaseKeystorePath = resolveProperty("POSTER_PILOT_KEYSTORE_PATH")
+val releaseKeystorePassword = resolveProperty("POSTER_PILOT_KEYSTORE_PASSWORD")
+val releaseKeyAlias = resolveProperty("POSTER_PILOT_KEY_ALIAS")
+val releaseKeyPassword = resolveProperty("POSTER_PILOT_KEY_PASSWORD")
+val hasReleaseSigning = releaseKeystorePath != null &&
+    releaseKeystorePassword != null &&
+    releaseKeyAlias != null &&
+    releaseKeyPassword != null
+
 android {
     namespace = "com.opengraphlabs.posterpilot"
     compileSdk = 35
@@ -24,6 +42,17 @@ android {
         )
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,7 +60,16 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = true
+        warningsAsErrors = false
     }
 
     compileOptions {

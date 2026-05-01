@@ -5,3 +5,10 @@ local.properties
 *.iml
 
 app/build/
+
+# Signing — never commit keystore material or signing passwords.
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+upload-keystore*
