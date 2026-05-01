@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy Auto Backup rules for Android 11 and below. Combined with the
+  android:allowBackup="false" attribute on <application>, this ensures the
+  business profile (DataStore), poster history (Room), and exported PNG cache
+  are never silently uploaded to Google Drive on older devices.
+-->
+<full-backup-content>
+    <exclude domain="root" />
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+    <exclude domain="external" />
+    <exclude domain="file" />
+</full-backup-content>

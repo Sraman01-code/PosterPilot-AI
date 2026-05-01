@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Single-tone foreground for Android 13+ themed icons. The system tints this
+  with the user's wallpaper-derived monochrome palette, so all paths must be
+  the same opaque color (#000000); the silhouette must read at small sizes.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M28,24h52c4.4,0 8,3.6 8,8v44c0,4.4 -3.6,8 -8,8H28c-4.4,0 -8,-3.6 -8,-8V32c0,-4.4 3.6,-8 8,-8z" />
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M30,30h48v8H30zM30,46h36v6H30zM30,60h28v6H30zM30,74h22v4H30z" />
+</vector>
