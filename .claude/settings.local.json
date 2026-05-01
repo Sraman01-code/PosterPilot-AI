@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E '\\\\.\\(kt|xml\\)$')",
+      "Bash(./gradlew :app:assembleDebug --quiet --console=plain)",
+      "Bash(./gradlew :app:assembleDebug --console=plain)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git reset *)",
+      "Bash(git commit *)",
+      "Bash(./gradlew :app:assembleDebug)",
+      "Bash(./gradlew.bat clean *)",
+      "Bash(./gradlew.bat --stop)",
+      "Bash(./gradlew.bat :app:assembleDebug)",
+      "Bash(./gradlew.bat :app:assembleRelease)",
+      "Bash(./gradlew.bat :app:bundleRelease)",
+      "Bash(./gradlew.bat :app:lintRelease)"
+    ]
+  }
+}
