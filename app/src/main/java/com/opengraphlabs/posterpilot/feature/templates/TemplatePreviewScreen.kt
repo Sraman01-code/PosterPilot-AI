@@ -78,7 +78,7 @@ fun TemplatePreviewScreen(
             }
         }.onFailure { throwable ->
             template = null
-            loadError = throwable.message ?: "Unable to load template."
+            loadError = throwable.message ?: "We couldn't open this template. Please try again."
         }
         isLoading = false
     }
@@ -105,9 +105,9 @@ fun TemplatePreviewScreen(
                 .padding(paddingValues)
         ) {
             when {
-                isLoading -> CenteredMessage("Setting the press…")
-                loadError != null -> CenteredMessage(loadError ?: "Unable to load template.")
-                template == null -> CenteredMessage("Template not found")
+                isLoading -> CenteredMessage("Loading template…")
+                loadError != null -> CenteredMessage(loadError ?: "We couldn't open this template. Please try again.")
+                template == null -> CenteredMessage("Template not found.")
                 else -> PreviewBody(
                     template = template!!,
                     businessProfile = businessProfile
@@ -184,7 +184,7 @@ private fun PreviewBody(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Tap edit to swap headline, caption, and call-to-action. Your business name and brand colour are wired in automatically.",
+            text = "Tap Edit to update the headline, caption, and call to action. Your business name and brand colour are applied automatically.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f)
         )
@@ -296,7 +296,7 @@ private fun ActionBar(onEdit: () -> Unit) {
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
-                    text = "Customise copy",
+                    text = "Customise this poster",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -316,7 +316,7 @@ private fun ActionBar(onEdit: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "Edit poster",
+                        text = "Edit",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )

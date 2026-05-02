@@ -108,7 +108,7 @@ fun BusinessSetupScreen(
                     }
                 ) {
                     Text(
-                        text = "Finish setup",
+                        text = "Save and continue",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -124,7 +124,7 @@ fun BusinessSetupScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Tell us a few\nbasics.",
+                text = "Tell us about\nyour business.",
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 36.sp,
@@ -132,7 +132,7 @@ fun BusinessSetupScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Saved on this device only. No account.",
+                text = "Saved on this device only. No account required.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
             )
@@ -193,7 +193,7 @@ fun BusinessSetupScreen(
             }
 
             FormSection(label = "Brand") {
-                FieldLabel(text = "Pick an accent")
+                FieldLabel(text = "Choose an accent colour")
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),

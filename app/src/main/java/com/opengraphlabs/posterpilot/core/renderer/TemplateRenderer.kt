@@ -30,6 +30,7 @@ import androidx.compose.ui.zIndex
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.LayerType
 import com.opengraphlabs.posterpilot.core.model.PlaceholderBinding
+import com.opengraphlabs.posterpilot.core.model.PosterCategory
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
@@ -43,9 +44,9 @@ private const val SquareCanvasHeight = 1080f
 private const val StoryCanvasHeight = 1920f
 
 data class TemplateCopy(
-    val headline: String = PosterDraft.DefaultHeadline,
-    val caption: String = PosterDraft.DefaultCaption,
-    val cta: String = PosterDraft.DefaultCta
+    val headline: String = "",
+    val caption: String = "",
+    val cta: String = ""
 )
 
 @Composable
@@ -58,7 +59,7 @@ fun TemplateRenderer(
 ) {
     val canvasHeight = template.format.canvasHeight()
     val aspectRatio = CanvasWidth / canvasHeight
-    val resolvedCopy = draft.resolveCopy(copy)
+    val resolvedCopy = draft.resolveCopy(template.category, copy)
     val logoScale = draft?.logoScale?.coerceIn(0.5f, 2f) ?: 1f
     val logoOffsetX = draft?.logoOffsetX ?: 0f
     val logoOffsetY = draft?.logoOffsetY ?: 0f
@@ -382,12 +383,23 @@ private fun PlaceholderBinding?.resolveText(
         PlaceholderBinding.LOGO, null -> ""
     }
 
-private fun PosterDraft?.resolveCopy(fallback: TemplateCopy): TemplateCopy =
-    TemplateCopy(
-        headline = this?.headline?.ifBlank { PosterDraft.DefaultHeadline } ?: fallback.headline,
-        caption = this?.caption?.ifBlank { PosterDraft.DefaultCaption } ?: fallback.caption,
-        cta = this?.cta?.ifBlank { PosterDraft.DefaultCta } ?: fallback.cta
+private fun PosterDraft?.resolveCopy(
+    category: PosterCategory,
+    fallback: TemplateCopy
+): TemplateCopy {
+    val defaults = PosterDraft.defaultsFor(category)
+    return TemplateCopy(
+        headline = this?.headline?.takeIf { it.isNotBlank() }
+            ?: fallback.headline.takeIf { it.isNotBlank() }
+            ?: defaults.headline,
+        caption = this?.caption?.takeIf { it.isNotBlank() }
+            ?: fallback.caption.takeIf { it.isNotBlank() }
+            ?: defaults.caption,
+        cta = this?.cta?.takeIf { it.isNotBlank() }
+            ?: fallback.cta.takeIf { it.isNotBlank() }
+            ?: defaults.cta
     )
+}
 
 private fun TemplateLayer.resolveTextColor(
     textStyle: TemplateTextStyle,

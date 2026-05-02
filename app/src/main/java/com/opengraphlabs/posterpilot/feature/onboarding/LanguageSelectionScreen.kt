@@ -76,7 +76,7 @@ fun LanguageSelectionScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Pick the tone\nyou speak in.",
+                text = "Choose your\nlanguage.",
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 36.sp,
@@ -84,7 +84,7 @@ fun LanguageSelectionScreen(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Used for AI copy and template hints. You can change it later.",
+                text = "Used for AI copy and template suggestions. You can change this later.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
             )

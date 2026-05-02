@@ -16,6 +16,7 @@ import android.text.TextUtils
 import com.opengraphlabs.posterpilot.core.model.BusinessProfile
 import com.opengraphlabs.posterpilot.core.model.LayerType
 import com.opengraphlabs.posterpilot.core.model.PlaceholderBinding
+import com.opengraphlabs.posterpilot.core.model.PosterCategory
 import com.opengraphlabs.posterpilot.core.model.PosterDraft
 import com.opengraphlabs.posterpilot.core.model.PosterFormat
 import com.opengraphlabs.posterpilot.core.model.PosterTemplate
@@ -46,7 +47,13 @@ class PosterBitmapExporter(private val context: Context) {
             .forEach { layer ->
                 runCatching {
                     when (layer.type) {
-                        LayerType.TEXT -> drawTextLayer(canvas, layer, businessProfile, draft)
+                        LayerType.TEXT -> drawTextLayer(
+                            canvas = canvas,
+                            layer = layer,
+                            businessProfile = businessProfile,
+                            draft = draft,
+                            category = template.category
+                        )
                         LayerType.IMAGE -> if (layer.binding == PlaceholderBinding.LOGO) {
                             drawLogo(canvas, layer, businessProfile, draft)
                         }
@@ -128,12 +135,13 @@ class PosterBitmapExporter(private val context: Context) {
         canvas: Canvas,
         layer: TemplateLayer,
         businessProfile: BusinessProfile?,
-        draft: PosterDraft
+        draft: PosterDraft,
+        category: PosterCategory
     ) {
         if (layer.width <= 0 || layer.height <= 0) return
 
         val textStyle = layer.textStyle ?: return
-        val text = layer.binding.resolveText(businessProfile, draft)
+        val text = layer.binding.resolveText(businessProfile, draft, category)
         if (text.isBlank()) return
 
         layer.pillBackground?.let { pill ->
@@ -288,16 +296,19 @@ private fun Paint.applyFill(
 
 private fun PlaceholderBinding?.resolveText(
     businessProfile: BusinessProfile?,
-    draft: PosterDraft
-): String =
-    when (this) {
-        PlaceholderBinding.HEADLINE -> draft.headline.ifBlank { PosterDraft.DefaultHeadline }
-        PlaceholderBinding.CAPTION -> draft.caption.ifBlank { PosterDraft.DefaultCaption }
-        PlaceholderBinding.CTA -> draft.cta.ifBlank { PosterDraft.DefaultCta }
+    draft: PosterDraft,
+    category: PosterCategory
+): String {
+    val defaults = PosterDraft.defaultsFor(category)
+    return when (this) {
+        PlaceholderBinding.HEADLINE -> draft.headline.ifBlank { defaults.headline }
+        PlaceholderBinding.CAPTION -> draft.caption.ifBlank { defaults.caption }
+        PlaceholderBinding.CTA -> draft.cta.ifBlank { defaults.cta }
         PlaceholderBinding.BUSINESS_NAME -> businessProfile?.businessName.orEmpty().ifBlank { "Your Business" }
         PlaceholderBinding.PHONE -> businessProfile?.phone.orEmpty().ifBlank { "Phone number" }
         PlaceholderBinding.LOGO, null -> ""
     }
+}
 
 private fun TemplateLayer.resolveTextColor(
     textStyle: TemplateTextStyle,

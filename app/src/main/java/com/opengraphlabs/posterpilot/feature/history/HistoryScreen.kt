@@ -74,7 +74,7 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             PosterTopBar(
-                eyebrow = "Archive",
+                eyebrow = "History",
                 title = "Your exports",
                 onBack = onBack
             )
@@ -102,7 +102,7 @@ fun HistoryScreen(
                             )
                             sharePoster(context, file)
                         } else {
-                            shareError = "That PNG is no longer on this device."
+                            shareError = "This poster file is no longer available on your device."
                         }
                     }
                 )
@@ -190,14 +190,14 @@ private fun ArchiveOverview(count: Int) {
                     .background(MaterialTheme.colorScheme.tertiary)
             )
             Text(
-                text = "PRESS ARCHIVE",
+                text = "EXPORT HISTORY",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = if (count == 1) "1 poster on file." else "$count posters on file.",
+            text = if (count == 1) "1 exported poster." else "$count exported posters.",
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
@@ -205,7 +205,7 @@ private fun ArchiveOverview(count: Int) {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Tap any tile to share again. Long-press the press, anytime.",
+            text = "Tap any poster to share it again.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -301,7 +301,7 @@ private fun PosterThumbnail(imagePath: String) {
     ) {
         if (imageBitmap == null) {
             Text(
-                text = "PNG MISSING",
+                text = "IMAGE UNAVAILABLE",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
             )
@@ -364,7 +364,7 @@ private fun ErrorBanner(message: String) {
     ) {
         Column {
             Text(
-                text = "TROUBLE",
+                text = "ERROR",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.error
             )
@@ -422,13 +422,13 @@ private fun EmptyArchive() {
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "QUIET ARCHIVE",
+            text = "NO EXPORTS YET",
             style = EyebrowStyle,
             color = MaterialTheme.colorScheme.tertiary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Nothing pressed yet.",
+            text = "No posters exported yet.",
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
@@ -436,7 +436,7 @@ private fun EmptyArchive() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Export a poster and it will live here, ready to share again whenever you need it.",
+            text = "Export a poster and it will appear here, ready to share again whenever you need it.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth(),

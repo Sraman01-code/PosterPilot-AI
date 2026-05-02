@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PosterPilot AI</string>
+    <string name="developer_label">by OpenGraph Labs</string>
 </resources>

@@ -76,7 +76,8 @@ fun HomeScreen(
             loadError = null
         }.onFailure { throwable ->
             templates = emptyList()
-            loadError = throwable.message ?: "Unable to load templates."
+            loadError = throwable.message
+                ?: "We couldn't load your templates. Please check your connection and try again."
         }
         isLoading = false
     }
@@ -84,8 +85,8 @@ fun HomeScreen(
     PosterPilotScaffold(
         topBar = {
             PosterTopBar(
-                eyebrow = "PosterPilot · Studio",
-                title = businessProfile?.businessName ?: "Studio",
+                eyebrow = "PosterPilot AI",
+                title = businessProfile?.businessName ?: "Your studio",
                 actions = {
                     ArchiveAction(onClick = onHistorySelected)
                 }
@@ -146,7 +147,7 @@ private fun GreetingHero(businessProfile: BusinessProfile?) {
                     .background(MaterialTheme.colorScheme.tertiary)
             )
             Text(
-                text = "TONIGHT'S CANVAS",
+                text = "TODAY'S TEMPLATES",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
@@ -194,8 +195,8 @@ private fun GreetingHero(businessProfile: BusinessProfile?) {
             )
             Text(
                 text = businessProfile?.businessName?.let {
-                    "Templates tuned for $it. Tap one to preview, edit copy, share to status."
-                } ?: "Templates for India's local shops. Tap one to preview, edit copy, share.",
+                    "Templates ready for $it. Tap one to preview, edit, and share."
+                } ?: "Templates designed for local businesses. Tap one to preview, edit, and share.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f)
             )
@@ -379,7 +380,7 @@ private fun LoadingState() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Setting the press…",
+            text = "Loading templates…",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             fontFamily = FontFamily.Serif
@@ -395,7 +396,7 @@ private fun ErrorState(message: String) {
             .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
         Text(
-            text = "TROUBLE",
+            text = "COULDN'T LOAD",
             style = EyebrowStyle,
             color = MaterialTheme.colorScheme.tertiary
         )
@@ -416,13 +417,13 @@ private fun EmptyState() {
             .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
         Text(
-            text = "QUIET STUDIO",
+            text = "NO TEMPLATES YET",
             style = EyebrowStyle,
             color = MaterialTheme.colorScheme.tertiary
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "No templates loaded.",
+            text = "No templates are available right now. Please try again in a moment.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -431,8 +432,8 @@ private fun EmptyState() {
 
 private fun PosterCategory.tagline(): String =
     when (this) {
-        PosterCategory.FESTIVAL -> "Festival mood."
-        PosterCategory.SALE_OFFER -> "Move stock fast."
-        PosterCategory.NEW_ARRIVAL -> "Fresh on shelves."
-        PosterCategory.THANK_YOU -> "A small thank you."
+        PosterCategory.FESTIVAL -> "Festival greetings."
+        PosterCategory.SALE_OFFER -> "Promote your offers."
+        PosterCategory.NEW_ARRIVAL -> "Showcase what's new."
+        PosterCategory.THANK_YOU -> "Thank your customers."
     }

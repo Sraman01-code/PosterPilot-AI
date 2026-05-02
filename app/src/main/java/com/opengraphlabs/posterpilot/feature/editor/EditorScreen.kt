@@ -127,6 +127,12 @@ fun EditorScreen(
             template = loadedTemplate
             loadError = null
             loadedTemplate?.let {
+                val defaults = PosterDraft.defaultsFor(it.category)
+                draft = draft.copy(
+                    headline = draft.headline.ifBlank { defaults.headline },
+                    caption = draft.caption.ifBlank { defaults.caption },
+                    cta = draft.cta.ifBlank { defaults.cta }
+                )
                 analyticsTracker.track(
                     event = AnalyticsEvents.EditorOpened,
                     params = mapOf(
@@ -138,7 +144,7 @@ fun EditorScreen(
             }
         }.onFailure { throwable ->
             template = null
-            loadError = throwable.message ?: "Unable to load editor."
+            loadError = throwable.message ?: "We couldn't open this template. Please try again."
         }
         isLoading = false
     }
@@ -190,7 +196,8 @@ fun EditorScreen(
                                 )
                                 ExportState.Success(file)
                             }.getOrElse { throwable ->
-                                val message = throwable.message ?: "Export failed"
+                                val message = throwable.message
+                                    ?: "We couldn't export this poster. Please try again."
                                 analyticsTracker.track(
                                     event = AnalyticsEvents.ExportFailed,
                                     params = mapOf(
@@ -220,9 +227,9 @@ fun EditorScreen(
                 .padding(paddingValues)
         ) {
             when {
-                isLoading -> CenterText("Setting the press…")
-                loadError != null -> CenterText(loadError ?: "Unable to load editor.")
-                template == null -> CenterText("Template not found")
+                isLoading -> CenterText("Loading editor…")
+                loadError != null -> CenterText(loadError ?: "We couldn't open this template. Please try again.")
+                template == null -> CenterText("Template not found.")
                 else -> EditorBody(
                     template = template!!,
                     businessProfile = businessProfile,
@@ -259,8 +266,8 @@ fun EditorScreen(
                                         cta = aiResult.copy.cta
                                     )
                                     aiCopyState = when (aiResult.source) {
-                                        AiCopySource.Backend -> AiCopyState.Success("AI copy applied.")
-                                        AiCopySource.Mock -> AiCopyState.Success("Sample copy applied.")
+                                        AiCopySource.Backend -> AiCopyState.Success("AI copy applied. Review before exporting.")
+                                        AiCopySource.Mock -> AiCopyState.Success("Sample copy applied. Edit before exporting.")
                                     }
                                     analyticsTracker.track(
                                         event = AnalyticsEvents.AiCopySuccess,
@@ -272,7 +279,7 @@ fun EditorScreen(
                                 }
                                 .onFailure { throwable ->
                                     val message = throwable.message
-                                        ?: "AI copy failed. Keep editing manually."
+                                        ?: "AI copy is unavailable right now. You can keep editing manually."
                                     aiCopyState = AiCopyState.Error(message)
                                     analyticsTracker.track(
                                         event = AnalyticsEvents.AiCopyFailed,
@@ -307,7 +314,7 @@ fun EditorScreen(
                         }
                     )
                     reportDialogOpen = false
-                    aiCopyState = AiCopyState.Success("Reported. Thanks for the flag.")
+                    aiCopyState = AiCopyState.Success("Report sent. Thank you for the feedback.")
                 }
             )
         }
@@ -443,7 +450,7 @@ private fun CopySection(
                     .background(MaterialTheme.colorScheme.tertiary)
             )
             Text(
-                text = if (aiCopyState is AiCopyState.Loading) "Composing copy…" else "Generate AI copy",
+                text = if (aiCopyState is AiCopyState.Loading) "Generating copy…" else "Generate copy with AI",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -458,7 +465,7 @@ private fun CopySection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "AI suggestions can miss the mark. Edit anything before exporting.",
+                text = "AI suggestions can be inaccurate. Please review and edit before exporting.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.weight(1f)
@@ -479,7 +486,7 @@ private fun CopySection(
     EditorTextField(
         value = draft.headline,
         onValueChange = { onDraftChanged(draft.copy(headline = it)) },
-        placeholder = "Big festival hook",
+        placeholder = "Your main message",
         maxLines = 2
     )
     Spacer(modifier = Modifier.height(14.dp))
@@ -487,15 +494,15 @@ private fun CopySection(
     EditorTextField(
         value = draft.caption,
         onValueChange = { onDraftChanged(draft.copy(caption = it)) },
-        placeholder = "Soft second line",
+        placeholder = "A short supporting line",
         maxLines = 3
     )
     Spacer(modifier = Modifier.height(14.dp))
-    FieldLabel("Call-to-action")
+    FieldLabel("Call to action")
     EditorTextField(
         value = draft.cta,
         onValueChange = { onDraftChanged(draft.copy(cta = it)) },
-        placeholder = "Visit today",
+        placeholder = "e.g. Visit today",
         maxLines = 1
     )
 }
@@ -777,7 +784,7 @@ private fun SuccessActions(
                 .background(MaterialTheme.colorScheme.tertiary)
         )
         Text(
-            text = "POSTER PRINTED",
+            text = "POSTER EXPORTED",
             style = EyebrowStyle,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -826,7 +833,7 @@ private fun CenterText(text: String) {
 private fun aiHelperText(state: AiCopyState): String? =
     when (state) {
         AiCopyState.Idle -> null
-        AiCopyState.Loading -> "Composing"
+        AiCopyState.Loading -> "Generating"
         is AiCopyState.Success -> state.message
         is AiCopyState.Error -> state.message
     }
@@ -834,24 +841,24 @@ private fun aiHelperText(state: AiCopyState): String? =
 private fun exportEyebrow(state: ExportState): String =
     when (state) {
         ExportState.Idle -> "READY"
-        ExportState.Exporting -> "WORKING"
-        is ExportState.Error -> "TROUBLE"
-        is ExportState.Success -> "DONE"
+        ExportState.Exporting -> "EXPORTING"
+        is ExportState.Error -> "EXPORT FAILED"
+        is ExportState.Success -> "EXPORTED"
     }
 
 private fun exportSubtitle(state: ExportState): String =
     when (state) {
-        ExportState.Idle -> "Export PNG"
-        ExportState.Exporting -> "Saving image…"
+        ExportState.Idle -> "Export as PNG"
+        ExportState.Exporting -> "Saving your poster…"
         is ExportState.Error -> state.message
-        is ExportState.Success -> "Poster ready"
+        is ExportState.Success -> "Poster saved"
     }
 
 private val ReportReasons = listOf(
     "Inappropriate or unsafe",
     "Inaccurate or misleading",
-    "Off-brand or off-tone",
-    "Other concern"
+    "Off-brand or wrong tone",
+    "Something else"
 )
 
 @Composable
@@ -864,7 +871,7 @@ private fun ReportAiCopyDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Report AI suggestion",
+                text = "Report this AI suggestion",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
@@ -872,7 +879,7 @@ private fun ReportAiCopyDialog(
         text = {
             Column {
                 Text(
-                    text = "Tell us why this AI-generated copy was a problem. Reports help us tune the prompts and remove unsafe outputs.",
+                    text = "Let us know what was wrong with this AI-generated copy. Your reports help us improve safety and quality.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
                 )
@@ -915,7 +922,7 @@ private fun ReportAiCopyDialog(
                     contentColor = MaterialTheme.colorScheme.background
                 )
             ) {
-                Text(text = "Submit report", fontWeight = FontWeight.SemiBold)
+                Text(text = "Send report", fontWeight = FontWeight.SemiBold)
             }
         },
         dismissButton = {

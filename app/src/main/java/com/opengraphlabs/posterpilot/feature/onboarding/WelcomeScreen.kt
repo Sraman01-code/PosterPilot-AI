@@ -65,7 +65,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                                 .background(Sindoor)
                         )
                         Text(
-                            text = "OPENGRAPH LABS · STUDIO 01",
+                            text = "BY OPENGRAPH LABS",
                             style = EyebrowStyle,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f)
                         )
@@ -103,7 +103,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                                 .background(Saffron)
                         )
                         Text(
-                            text = "A small poster studio for India's local shops. Pick a template, edit a line of copy, share to status — in under a minute.",
+                            text = "Create posters for your business in minutes. Pick a template, edit your copy, and share — no design experience needed.",
                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.82f)
                         )
@@ -129,7 +129,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Begin setup",
+                                text = "Get started",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -150,7 +150,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                         }
                     }
                     Text(
-                        text = "Two short steps · No account needed",
+                        text = "Two quick steps. No account required.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.58f)
                     )

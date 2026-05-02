@@ -80,7 +80,7 @@ private fun TopMark(modifier: Modifier = Modifier) {
                 .background(MaterialTheme.colorScheme.tertiary)
         )
         Text(
-            text = "POSTERPILOT · EST. 2026",
+            text = "POSTERPILOT AI",
             style = EyebrowStyle,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -103,7 +103,7 @@ private fun WordmarkBlock(modifier: Modifier = Modifier) {
                     .background(MaterialTheme.colorScheme.tertiary)
             )
             Text(
-                text = "ISSUE №01",
+                text = "BY OPENGRAPH LABS",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
@@ -132,7 +132,7 @@ private fun WordmarkBlock(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
-            text = "An editorial press for the corner store. Pick a template, type your line, send it tonight.",
+            text = "Posters for your business — designed in minutes, ready to share.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f)
         )
@@ -154,12 +154,12 @@ private fun BottomLoader(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "INKING THE ROLLER",
+                text = "LOADING",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
             Text(
-                text = "FRESH OFF THE PRESS",
+                text = "PREPARING YOUR STUDIO",
                 style = EyebrowStyle,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
